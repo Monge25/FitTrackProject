@@ -1,6 +1,7 @@
 package com.example.proyecto.wear.presentation.data.model
 
 enum class WorkoutScreen {
+    SPLASH,
     HOME,
     ROUTINE_LIST,
     READY,

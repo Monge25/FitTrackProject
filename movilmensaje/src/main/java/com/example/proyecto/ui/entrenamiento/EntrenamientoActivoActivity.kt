@@ -1,6 +1,7 @@
 package com.example.proyecto.ui.entrenamiento
 import com.example.movilmensaje.R
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
@@ -505,12 +506,16 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
         enviarAlReloj(WatchConstants.PATH_FINISH_WORKOUT)
 
-        guardarSesionEntrenamiento()
+        val idSesion = guardarSesionEntrenamiento()
+
+        val intent = Intent(this, ResumenEntrenamientoActivity::class.java)
+        intent.putExtra(ResumenEntrenamientoActivity.EXTRA_SESION_ID, idSesion)
+        startActivity(intent)
 
         finish()
     }
 
-    private fun guardarSesionEntrenamiento() {
+    private fun guardarSesionEntrenamiento(): Long {
 
         val fechaFin =
             System.currentTimeMillis()
@@ -555,6 +560,8 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
             .guardarSesion(
                 sesion
             )
+
+        return sesion.id
     }
 
 

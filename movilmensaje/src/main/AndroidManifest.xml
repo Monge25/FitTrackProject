@@ -15,15 +15,21 @@
         android:theme="@style/Theme.Proyecto"
         android:usesCleartextTraffic="true">
 
-        <!-- Entrada visual y funcional de FitTrack (diseño y flujo de login) -->
+        <!-- Pantalla de carga inicial (3s) antes del login -->
         <activity
-            android:name="com.example.proyecto.MainActivity"
-            android:exported="true">
+            android:name="com.example.proyecto.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Proyecto">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Entrada visual y funcional de FitTrack (diseño y flujo de login) -->
+        <activity
+            android:name="com.example.proyecto.MainActivity"
+            android:exported="false" />
 
         <activity
             android:name="com.example.proyecto.Principal"

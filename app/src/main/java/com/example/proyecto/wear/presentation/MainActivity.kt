@@ -15,6 +15,8 @@ import com.example.proyecto.wear.presentation.finished.WorkoutFinishedScreen
 import com.example.proyecto.wear.presentation.history.WorkoutHistoryScreen
 import com.example.proyecto.wear.presentation.home.HomeScreen
 import com.example.proyecto.wear.presentation.data.model.RoutineCatalog
+import com.example.proyecto.wear.presentation.data.model.HistorialEntrenamiento
+import com.example.proyecto.wear.presentation.data.model.WorkoutHistoryStore
 import com.example.proyecto.wear.presentation.paused.PausedWorkoutScreen
 import com.example.proyecto.wear.presentation.ready.ReadyWorkoutScreen
 import com.example.proyecto.wear.presentation.rest.RestScreen
@@ -22,7 +24,9 @@ import com.example.proyecto.wear.presentation.routines.RoutineListScreen
 import com.example.proyecto.wear.presentation.service.HeartRateSimulator
 import com.example.proyecto.wear.presentation.service.RestTimer
 import com.example.proyecto.wear.presentation.service.WorkoutTimer
+import com.example.proyecto.wear.presentation.splash.SplashScreen
 import com.example.proyecto.wear.presentation.theme.ProyectoTheme
+import com.example.proyecto.wear.presentation.utils.TimeUtils
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
@@ -94,6 +98,14 @@ class MainActivity :
     @Composable
     private fun FitTrackWearApp() {
         when (WorkoutState.currentScreen) {
+
+            WorkoutScreen.SPLASH -> {
+                SplashScreen(
+                    onFinished = {
+                        WorkoutState.showHome()
+                    }
+                )
+            }
 
             WorkoutScreen.HOME -> {
                 HomeScreen(
@@ -185,6 +197,7 @@ class MainActivity :
 
             WorkoutScreen.HISTORY -> {
                 WorkoutHistoryScreen(
+                    sesiones = WorkoutHistoryStore.obtenerHistorial(this@MainActivity),
                     onBack = {
                         WorkoutState.showHome()
                     }
@@ -282,11 +295,27 @@ class MainActivity :
         WorkoutTimer.pause()
         RestTimer.stop()
         HeartRateSimulator.stop()
+
+        guardarSesionEnHistorial()
+
         WorkoutState.finishWorkout()
 
         enviarMensajeAlTelefono(
             path = WearConstants.PATH_FINISH_WORKOUT,
             message = "FINISH"
+        )
+    }
+
+    private fun guardarSesionEnHistorial() {
+        WorkoutHistoryStore.guardarSesion(
+            context = this,
+            sesion = HistorialEntrenamiento(
+                nombreRutina = WorkoutState.workout.nombreRutina,
+                duracion = TimeUtils.formatSeconds(WorkoutState.elapsedSeconds),
+                ejercicios = WorkoutState.workout.totalEjercicios,
+                frecuenciaPromedio = WorkoutState.heartRate,
+                calorias = WorkoutState.calories
+            )
         )
     }
 

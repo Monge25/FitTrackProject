@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 
 object WorkoutState {
 
-    var currentScreen by mutableStateOf(WorkoutScreen.HOME)
+    var currentScreen by mutableStateOf(WorkoutScreen.SPLASH)
         private set
 
     var phoneConnected by mutableStateOf(false)
