@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">FitTrack Wear</string>
+
+
+    <string name="start">Empezar</string>
+    <string name="pause">Pausar</string>
+    <string name="resume">Reanudar</string>
+    <string name="finish">Finalizar</string>
+
+    <string name="history">Historial</string>
+
+    <string name="rest">Descanso</string>
+
+    <string name="connected">Conectado</string>
+
+    <string name="waiting">Esperando teléfono</string>
+</resources>

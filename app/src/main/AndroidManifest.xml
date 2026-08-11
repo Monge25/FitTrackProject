@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-feature android:name="android.hardware.type.watch"/>
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MIHolaWear">
+
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="true" />
+
+        <uses-library
+            android:name="wear-sdk"
+            android:required="false" />
+
+        <!-- Entrada visual y funcional de FitTrack (diseño Compose) -->
+        <activity
+            android:name="com.example.proyecto.wear.presentation.MainActivity"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/MainActivityTheme.Starting">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Actividad base original (mensajería probada), conservada sin cambios de código,
+             disponible para pruebas manuales pero ya no es la pantalla de lanzamiento -->
+        <activity
+            android:name=".MainActivityTest"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Servicio de mensajería de FitTrack: se deja igual que en el proyecto original
+             (comentado ahí durante las pruebas de diagnóstico). Actívalo si decides usarlo
+             en vez de / además del listener embebido en MainActivityTest. -->
+        <!--
+        <service
+            android:name="com.example.proyecto.wear.presentation.communication.WearListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data
+                    android:scheme="wear"
+                    android:host="*"
+                    android:pathPrefix="/fittrack" />
+            </intent-filter>
+        </service>
+        -->
+
+    </application>
+
+</manifest>

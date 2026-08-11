@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navInicio"
+        android:icon="@drawable/ic_home"
+        android:title="Inicio"/>
+
+    <item
+        android:id="@+id/navRutinas"
+        android:icon="@drawable/ic_routine"
+        android:title="Rutinas"/>
+
+    <item
+        android:id="@+id/navCalendario"
+        android:icon="@drawable/ic_calendar"
+        android:title="Calendario"/>
+
+    <item
+        android:id="@+id/navProgreso"
+        android:icon="@drawable/ic_progress"
+        android:title="Progreso"/>
+
+    <item
+        android:id="@+id/navUsuarios"
+        android:icon="@drawable/ic_people"
+        android:title="Usuarios"/>
+
+    <item
+        android:id="@+id/navPerfil"
+        android:icon="@drawable/ic_manage_accounts"
+        android:title="Perfil"/>
+
+</menu>

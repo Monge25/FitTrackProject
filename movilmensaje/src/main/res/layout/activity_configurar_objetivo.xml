@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#070B12"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="35dp">
+
+        <!-- ENCABEZADO -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/fondo_encabezado_dashboard"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.15"
+                android:text="PROGRESO"
+                android:textColor="#2F7BFF"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Objetivo semanal"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Configura el tiempo y las rutinas que deseas completar."
+                android:textColor="#B7C0CD"
+                android:textSize="15sp"/>
+
+        </LinearLayout>
+
+        <!-- CONTENIDO -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingTop="24dp"
+            android:paddingEnd="20dp">
+
+            <!-- ================= META ================= -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Meta de entrenamiento"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="18dp"
+                android:text="¿Cuánto tiempo y cuántas sesiones quieres lograr?"
+                android:textColor="#8D99A8"
+                android:textSize="13sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Horas por semana"
+                        android:textColor="#B7C0CD"
+                        android:textSize="13sp"
+                        android:textStyle="bold"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:boxBackgroundColor="#0B0F16"
+                        app:boxStrokeColor="@color/selector_box_stroke"
+                        app:boxCornerRadiusTopStart="18dp"
+                        app:boxCornerRadiusTopEnd="18dp"
+                        app:boxCornerRadiusBottomStart="18dp"
+                        app:boxCornerRadiusBottomEnd="18dp"
+                        app:hintEnabled="false"
+                        app:suffixText="h"
+                        app:suffixTextColor="#5B9BFF">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etHorasObjetivo"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:hint="5"
+                            android:inputType="numberDecimal"
+                            android:paddingStart="16dp"
+                            android:textColor="#FFFFFF"
+                            android:textColorHint="#5B6675"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sesiones"
+                        android:textColor="#B7C0CD"
+                        android:textSize="13sp"
+                        android:textStyle="bold"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:boxBackgroundColor="#0B0F16"
+                        app:boxStrokeColor="@color/selector_box_stroke"
+                        app:boxCornerRadiusTopStart="18dp"
+                        app:boxCornerRadiusTopEnd="18dp"
+                        app:boxCornerRadiusBottomStart="18dp"
+                        app:boxCornerRadiusBottomEnd="18dp"
+                        app:hintEnabled="false">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSesionesObjetivo"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:hint="4"
+                            android:inputType="number"
+                            android:paddingStart="16dp"
+                            android:textColor="#FFFFFF"
+                            android:textColorHint="#5B6675"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ================= DÍAS ================= -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Días de entrenamiento"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="14dp"
+                android:text="Elige los días que vas a entrenar."
+                android:textColor="#8D99A8"
+                android:textSize="13sp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#151B26"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="4dp"
+                app:strokeColor="#263242"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp">
+
+                    <CheckBox
+                        android:id="@+id/cbLunes"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Lunes"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#263242"/>
+
+                    <CheckBox
+                        android:id="@+id/cbMartes"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Martes"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#263242"/>
+
+                    <CheckBox
+                        android:id="@+id/cbMiercoles"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Miércoles"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#263242"/>
+
+                    <CheckBox
+                        android:id="@+id/cbJueves"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Jueves"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#263242"/>
+
+                    <CheckBox
+                        android:id="@+id/cbViernes"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Viernes"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#263242"/>
+
+                    <CheckBox
+                        android:id="@+id/cbSabado"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Sábado"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#263242"/>
+
+                    <CheckBox
+                        android:id="@+id/cbDomingo"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Domingo"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ================= RUTINAS ================= -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Rutinas planeadas"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="14dp"
+                android:text="Elige qué rutinas vas a seguir esta semana."
+                android:textColor="#8D99A8"
+                android:textSize="13sp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#151B26"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="4dp"
+                app:strokeColor="#263242"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:id="@+id/llRutinasPlaneadas"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"/>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- BOTONES -->
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardarObjetivo"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="32dp"
+                android:text="Guardar objetivo"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#2F7BFF"
+                app:cornerRadius="20dp"
+                app:elevation="6dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelarObjetivo"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="14dp"
+                android:text="Cancelar"
+                android:textAllCaps="false"
+                android:textColor="#2F7BFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#151B26"
+                app:cornerRadius="20dp"
+                app:strokeColor="#2F7BFF"
+                app:strokeWidth="1dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

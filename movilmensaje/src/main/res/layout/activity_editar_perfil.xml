@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#070B12"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="35dp">
+
+        <!-- HEADER -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:background="@drawable/fondo_encabezado_dashboard"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MI CUENTA"
+                android:textColor="#2F7BFF"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Editar perfil"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Actualiza tu información personal."
+                android:textColor="#B7C0CD"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <!-- FORMULARIO -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <EditText
+                android:id="@+id/etEditarNombrePerfil"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:backgroundTint="#151B26"
+                android:background="@drawable/edittext_dark"
+                android:hint="Nombre completo"
+                android:textColor="#FFFFFF"
+                app:hintTextColor="#8D99A8"
+                android:padding="16dp"/>
+
+            <EditText
+                android:id="@+id/etEditarPesoPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/edittext_dark"
+                android:hint="Peso en kg"
+                android:inputType="numberDecimal"
+                android:textColor="#FFFFFF"
+                app:hintTextColor="#8D99A8"
+                android:padding="16dp"/>
+
+            <EditText
+                android:id="@+id/etEditarAlturaPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/edittext_dark"
+                android:hint="Altura en metros"
+                android:inputType="numberDecimal"
+                android:textColor="#FFFFFF"
+                app:hintTextColor="#8D99A8"
+                android:padding="16dp"/>
+
+            <EditText
+                android:id="@+id/etEditarObjetivoPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/edittext_dark"
+                android:gravity="top"
+                android:hint="Objetivo personal"
+                android:inputType="textMultiLine"
+                android:textColor="#FFFFFF"
+                app:hintTextColor="#8D99A8"
+                android:padding="16dp"/>
+
+            <!-- BOTÓN GUARDAR -->
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardarPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="28dp"
+                android:text="Guardar cambios"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#2F7BFF"
+                app:cornerRadius="22dp"
+                app:elevation="5dp"/>
+
+            <!-- BOTÓN CANCELAR -->
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelarPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="14dp"
+                android:text="Cancelar"
+                android:textAllCaps="false"
+                android:textColor="#2F7BFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#151B26"
+                app:cornerRadius="22dp"
+                app:strokeColor="#2F7BFF"
+                app:strokeWidth="1dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -1,0 +1,24 @@
+
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+<item
+    android:state_checked="true"
+    android:color="#2F7BFF"/>
+
+<item
+    android:color="#7D8798"/>
+
+    <color name="background_dark">#070B12</color>
+    <color name="surface_dark">#151B26</color>
+    <color name="surface_light">#1B2432</color>
+
+    <color name="primary_blue">#2F7BFF</color>
+    <color name="primary_blue_dark">#1E63F1</color>
+
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B8C0CC</color>
+
+    <color name="border_dark">#263242</color>
+
+</selector>
