@@ -9,5 +9,6 @@ enum class WorkoutScreen {
     REST,
     PAUSED,
     FINISHED,
-    HISTORY
+    HISTORY,
+    HISTORY_DETAIL
 }

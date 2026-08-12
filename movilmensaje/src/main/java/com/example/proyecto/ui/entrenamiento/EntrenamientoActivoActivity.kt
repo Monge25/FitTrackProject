@@ -13,13 +13,21 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import java.util.Locale
 import kotlin.random.Random
+import com.example.proyecto.data.mock.RutinasCatalog
+import com.example.proyecto.data.model.EjercicioProgramado
 import com.example.proyecto.data.model.SesionEntrenamiento
 import com.example.proyecto.data.repository.ProgresoRepository
+import com.example.proyecto.data.wear.EntrenamientoBridge
 import com.example.proyecto.data.wear.WatchConstants
 import com.example.proyecto.data.wear.WatchMessageSender
+import com.google.android.gms.wearable.MessageClient
+import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 
-class EntrenamientoActivoActivity : AppCompatActivity() {
+class EntrenamientoActivoActivity :
+    AppCompatActivity(),
+    EntrenamientoBridge.Listener,
+    MessageClient.OnMessageReceivedListener {
 
     private lateinit var tvNombreRutina: TextView
     private lateinit var tvEjercicioActual: TextView
@@ -51,31 +59,12 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
     private var nombreRutinaActual = "Entrenamiento"
 
-    // TODO: hoy es una lista fija porque la pantalla de Rutinas
-    // (RutinasFragment) también usa datos fijos y no hay endpoint de
-    // ejercicios en el backend todavía. Cuando exista ese endpoint,
-    // cargar esta lista desde la rutina real (RUTINA_ID) en vez de
-    // dejarla hardcodeada aquí.
-    private val ejercicios = listOf(
-        EjercicioEntrenamiento(
-            "Press de banca",
-            4,
-            10,
-            60
-        ),
-        EjercicioEntrenamiento(
-            "Press militar",
-            4,
-            12,
-            60
-        ),
-        EjercicioEntrenamiento(
-            "Fondos de tríceps",
-            3,
-            12,
-            45
-        )
-    )
+    // Se llenan en cargarRutina(), a partir de la rutina real elegida
+    // (RutinasCatalog, buscada por RUTINA_ID). Si la rutina no tiene
+    // ejercicios predeterminados (por ejemplo "Cardio", o una rutina
+    // personalizada), se usa un solo ejercicio genérico como respaldo
+    // para no dejar la pantalla sin nada que mostrar.
+    private var ejercicios: List<EjercicioProgramado> = emptyList()
 
     private val handlerCronometro =
         Handler(Looper.getMainLooper())
@@ -111,14 +100,79 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
         iniciarFrecuenciaCardiaca()
 
-        // Enlace con el reloj: le avisamos que hay un entrenamiento
-        // listo y arrancamos de inmediato (esta pantalla no tiene un
-        // paso separado de "confirmar inicio").
-        enviarAlReloj(WatchConstants.PATH_WORKOUT_READY) {
-            enviarAlReloj(WatchConstants.PATH_START_WORKOUT)
-        }
+        val lanzadoDesdeReloj =
+            intent.getBooleanExtra(
+                EXTRA_LANZADO_DESDE_RELOJ,
+                false
+            )
 
-        verificarConexionReloj()
+        if (lanzadoDesdeReloj) {
+            // El reloj ya inició el entrenamiento por su cuenta y fue
+            // quien abrió esta pantalla; no hace falta decirle de
+            // nuevo que está "listo" ni que "inicie".
+            tvEstadoWatch.text = "CONECTADO"
+            vPuntoWatch.setBackgroundResource(R.drawable.fondo_punto_online)
+        } else {
+            // Enlace con el reloj: le avisamos que hay un
+            // entrenamiento listo y arrancamos de inmediato (esta
+            // pantalla no tiene un paso separado de "confirmar
+            // inicio").
+            enviarAlReloj(WatchConstants.PATH_WORKOUT_READY) {
+                enviarAlReloj(WatchConstants.PATH_START_WORKOUT)
+            }
+
+            verificarConexionReloj()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        EntrenamientoBridge.registrar(this)
+
+        // Respaldo en vivo mientras esta pantalla está abierta —
+        // mismo patrón que ya usa el reloj (MainActivity.kt,
+        // fittrackwear), que resultó mucho más confiable que
+        // depender solo del WearableListenerService en segundo
+        // plano (PhoneWearListenerService) en dispositivos físicos.
+        Wearable.getMessageClient(this).addListener(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        EntrenamientoBridge.quitar(this)
+        Wearable.getMessageClient(this).removeListener(this)
+    }
+
+    override fun onMessageReceived(messageEvent: MessageEvent) {
+        val path = messageEvent.path
+
+        mainHandlerReloj.post {
+            when (path) {
+                WatchConstants.PATH_PAUSE_WORKOUT -> onPausarDesdeReloj()
+                WatchConstants.PATH_RESUME_WORKOUT -> onReanudarDesdeReloj()
+                WatchConstants.PATH_FINISH_WORKOUT -> onFinalizarDesdeReloj()
+            }
+        }
+    }
+
+    private val mainHandlerReloj = Handler(Looper.getMainLooper())
+
+    // --- EntrenamientoBridge.Listener: acciones disparadas desde el reloj ---
+
+    override fun onPausarDesdeReloj() {
+        if (entrenamientoActivo) {
+            aplicarPausa()
+        }
+    }
+
+    override fun onReanudarDesdeReloj() {
+        if (!entrenamientoActivo) {
+            aplicarReanudacion()
+        }
+    }
+
+    override fun onFinalizarDesdeReloj() {
+        finalizarEntrenamiento(avisarAlReloj = false)
     }
 
     private var fechaInicioEntrenamiento: Long = 0L
@@ -212,6 +266,12 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
     private fun cargarRutina() {
 
+        val rutinaId =
+            intent.getIntExtra(
+                "RUTINA_ID",
+                0
+            )
+
         val nombreRutina =
             intent.getStringExtra(
                 "RUTINA_NOMBRE"
@@ -221,6 +281,26 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
         tvNombreRutina.text =
             nombreRutina.uppercase()
+
+        val ejerciciosDeLaRutina =
+            RutinasCatalog.buscarPorId(rutinaId)
+                ?.ejerciciosPredeterminados
+
+        ejercicios =
+            if (ejerciciosDeLaRutina.isNullOrEmpty()) {
+                // Respaldo: rutina sin ejercicios predeterminados
+                // (ej. "Cardio") o id no encontrado.
+                listOf(
+                    EjercicioProgramado(
+                        nombre = nombreRutina,
+                        series = 1,
+                        repeticiones = 0,
+                        descansoSegundos = 30
+                    )
+                )
+            } else {
+                ejerciciosDeLaRutina
+            }
     }
 
 
@@ -291,10 +371,17 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
         val ejercicio =
             ejercicios[indiceEjercicio]
 
-        enviarAlReloj(WatchConstants.PATH_REST)
+        // Se manda la duración real del descanso de este ejercicio
+        // (no el mensaje genérico de estado) para que el reloj
+        // cuente los mismos segundos que el teléfono, en vez de su
+        // valor fijo anterior.
+        enviarAlReloj(
+            path = WatchConstants.PATH_REST,
+            mensaje = ejercicio.descansoSegundos.toString()
+        )
 
         iniciarDescanso(
-            ejercicio.descanso
+            ejercicio.descansoSegundos
         )
     }
 
@@ -468,33 +555,44 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
     private fun cambiarEstadoEntrenamiento() {
 
-        entrenamientoActivo =
-            !entrenamientoActivo
-
         if (entrenamientoActivo) {
 
-            btnPausar.text =
-                "PAUSAR"
+            aplicarPausa()
 
-            tvEstadoEntrenamiento.text =
-                "ENTRENAMIENTO ACTIVO"
-
-            enviarAlReloj(WatchConstants.PATH_RESUME_WORKOUT)
+            enviarAlReloj(WatchConstants.PATH_PAUSE_WORKOUT)
 
         } else {
 
-            btnPausar.text =
-                "REANUDAR"
+            aplicarReanudacion()
 
-            tvEstadoEntrenamiento.text =
-                "ENTRENAMIENTO PAUSADO"
-
-            enviarAlReloj(WatchConstants.PATH_PAUSE_WORKOUT)
+            enviarAlReloj(WatchConstants.PATH_RESUME_WORKOUT)
         }
     }
 
+    private fun aplicarPausa() {
 
-    private fun finalizarEntrenamiento() {
+        entrenamientoActivo = false
+
+        btnPausar.text =
+            "REANUDAR"
+
+        tvEstadoEntrenamiento.text =
+            "ENTRENAMIENTO PAUSADO"
+    }
+
+    private fun aplicarReanudacion() {
+
+        entrenamientoActivo = true
+
+        btnPausar.text =
+            "PAUSAR"
+
+        tvEstadoEntrenamiento.text =
+            "ENTRENAMIENTO ACTIVO"
+    }
+
+
+    private fun finalizarEntrenamiento(avisarAlReloj: Boolean = true) {
 
         entrenamientoActivo = false
 
@@ -504,7 +602,9 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
         handlerFrecuencia.removeCallbacksAndMessages(null)
 
-        enviarAlReloj(WatchConstants.PATH_FINISH_WORKOUT)
+        if (avisarAlReloj) {
+            enviarAlReloj(WatchConstants.PATH_FINISH_WORKOUT)
+        }
 
         val idSesion = guardarSesionEntrenamiento()
 
@@ -651,12 +751,8 @@ class EntrenamientoActivoActivity : AppCompatActivity() {
 
         temporizadorDescanso?.cancel()
     }
+
+    companion object {
+        const val EXTRA_LANZADO_DESDE_RELOJ = "EXTRA_LANZADO_DESDE_RELOJ"
+    }
 }
-
-
-data class EjercicioEntrenamiento(
-    val nombre: String,
-    val series: Int,
-    val repeticiones: Int,
-    val descanso: Int
-)

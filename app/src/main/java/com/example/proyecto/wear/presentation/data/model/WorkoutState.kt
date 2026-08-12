@@ -29,6 +29,9 @@ object WorkoutState {
     var calories by mutableIntStateOf(0)
         private set
 
+    var sesionHistorialSeleccionada by mutableStateOf<HistorialEntrenamiento?>(null)
+        private set
+
     fun setConnected(connected: Boolean) {
         phoneConnected = connected
     }
@@ -76,7 +79,13 @@ object WorkoutState {
     }
 
     fun showHistory() {
+        sesionHistorialSeleccionada = null
         currentScreen = WorkoutScreen.HISTORY
+    }
+
+    fun showHistoryDetail(sesion: HistorialEntrenamiento) {
+        sesionHistorialSeleccionada = sesion
+        currentScreen = WorkoutScreen.HISTORY_DETAIL
     }
 
     fun showHome() {

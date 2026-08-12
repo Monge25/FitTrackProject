@@ -51,9 +51,10 @@ object WorkoutMessageHandler {
             }
 
             WearConstants.PATH_REST -> {
+                val segundos = message.toIntOrNull() ?: 45
                 WorkoutTimer.pause()
-                WorkoutState.startRest(45)
-                RestTimer.start(45)
+                WorkoutState.startRest(segundos)
+                RestTimer.start(segundos)
             }
 
             WearConstants.PATH_NEXT_EXERCISE -> {

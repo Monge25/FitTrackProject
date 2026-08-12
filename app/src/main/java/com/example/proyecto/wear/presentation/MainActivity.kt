@@ -12,6 +12,7 @@ import com.example.proyecto.wear.presentation.communication.WorkoutMessageHandle
 import com.example.proyecto.wear.presentation.data.model.WorkoutScreen
 import com.example.proyecto.wear.presentation.data.model.WorkoutState
 import com.example.proyecto.wear.presentation.finished.WorkoutFinishedScreen
+import com.example.proyecto.wear.presentation.history.HistorialDetalleScreen
 import com.example.proyecto.wear.presentation.history.WorkoutHistoryScreen
 import com.example.proyecto.wear.presentation.home.HomeScreen
 import com.example.proyecto.wear.presentation.data.model.RoutineCatalog
@@ -198,10 +199,31 @@ class MainActivity :
             WorkoutScreen.HISTORY -> {
                 WorkoutHistoryScreen(
                     sesiones = WorkoutHistoryStore.obtenerHistorial(this@MainActivity),
+                    onSelectSession = { sesion ->
+                        WorkoutState.showHistoryDetail(sesion)
+                    },
                     onBack = {
                         WorkoutState.showHome()
                     }
                 )
+            }
+
+            WorkoutScreen.HISTORY_DETAIL -> {
+                val sesion = WorkoutState.sesionHistorialSeleccionada
+
+                if (sesion != null) {
+                    HistorialDetalleScreen(
+                        sesion = sesion,
+                        onBack = {
+                            WorkoutState.showHistory()
+                        }
+                    )
+                } else {
+                    // No debería pasar (solo se llega aquí tras elegir
+                    // una sesión), pero por seguridad no dejamos la
+                    // pantalla en blanco.
+                    WorkoutState.showHistory()
+                }
             }
         }
     }
@@ -211,9 +233,12 @@ class MainActivity :
         WorkoutTimer.start()
         HeartRateSimulator.start()
 
+        // Se manda el nombre de la rutina (no un texto fijo) para
+        // que el teléfono sepa qué entrenamiento abrir si el reloj
+        // fue el que inició, no el teléfono.
         enviarMensajeAlTelefono(
             path = WearConstants.PATH_START_WORKOUT,
-            message = "START"
+            message = WorkoutState.workout.nombreRutina
         )
     }
 
