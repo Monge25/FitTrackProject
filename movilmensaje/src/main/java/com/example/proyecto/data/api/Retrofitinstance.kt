@@ -5,6 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
     private const val BASE_URL = "https://kotlinapi-production.up.railway.app/"
+    // private const val LOCAL_BASE_URL = ""
 
     val api: ClientesApiService by lazy {
         Retrofit.Builder()

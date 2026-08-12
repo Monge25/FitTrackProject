@@ -232,7 +232,7 @@ class UsuariosFragment : Fragment() {
             nombre = nombre,
             correo = correo,
             rol = rol.uppercase(),
-            activo = true
+            esActivo = true
         )
 
         usuarios.add(
@@ -287,7 +287,7 @@ class UsuariosFragment : Fragment() {
                             nombre = nombre,
                             correo = correo,
                             rol = rol,
-                            activo = activo
+                            esActivo = activo
                         )
 
                     limpiarBusqueda()
@@ -379,7 +379,7 @@ class UsuariosFragment : Fragment() {
 
         tvUsuariosActivos.text =
             usuarios.count {
-                it.activo
+                it.esActivo
             }.toString()
 
         tvCantidadResultados.text =

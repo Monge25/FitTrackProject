@@ -20,7 +20,7 @@ object UsuariosCatalog {
             nombre = "Alexa Gastélum",
             correo = "alexa@fittrack.com",
             rol = "ADMINISTRADOR",
-            activo = true
+            esActivo = true
         ),
 
         Usuario(
@@ -28,7 +28,7 @@ object UsuariosCatalog {
             nombre = "Nicol",
             correo = "nicol@fittrack.com",
             rol = "OPERADOR",
-            activo = true
+            esActivo = true
         ),
 
         Usuario(
@@ -36,7 +36,7 @@ object UsuariosCatalog {
             nombre = "Emiliano",
             correo = "emiliano@fittrack.com",
             rol = "OPERADOR",
-            activo = true
+            esActivo = true
         )
     )
 
@@ -70,7 +70,7 @@ object UsuariosCatalog {
             nombre = nombre,
             correo = correo,
             rol = rol,
-            activo = true
+            esActivo = true
         )
 
         usuarios.add(nuevoUsuario)

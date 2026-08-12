@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: LoginViewModel by viewModels()
     private lateinit var tokenManager: TokenManager
 
-    private lateinit var etUsuario: EditText
+    private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var btnLogin: Button
     private lateinit var progressLogin: ProgressBar
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         tokenManager = TokenManager(this)
 
-        etUsuario = findViewById(R.id.etUsuario)
+        etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         btnLogin = findViewById(R.id.btnLogin)
         progressLogin = findViewById(R.id.progressLogin)
@@ -46,11 +46,11 @@ class MainActivity : AppCompatActivity() {
 //        }
 
         btnLogin.setOnClickListener {
-            val usuario = etUsuario.text.toString().trim()
+            val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            if (usuario.isEmpty()) {
-                etUsuario.error = "Ingresa el usuario"
+            if (email.isEmpty()) {
+                etEmail.error = "Ingresa tu correo electrónico"
                 return@setOnClickListener
             }
 
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            viewModel.login(usuario, password)
+            viewModel.login(email, password)
         }
 
         findViewById<android.widget.TextView>(
@@ -84,17 +84,18 @@ class MainActivity : AppCompatActivity() {
                     progressLogin.visibility = View.VISIBLE
                     btnLogin.isEnabled = false
                 }
-
                 is LoginViewModel.LoginState.Success -> {
                     progressLogin.visibility = View.GONE
                     btnLogin.isEnabled = true
-
                     lifecycleScope.launch {
                         tokenManager.guardarToken(state.token)
-                        irAClientes()
+                        tokenManager.guardarDatosUsuario(
+                            nombre = state.nombre,
+                            rol = state.rol
+                        )
+                        irAPrincipal()
                     }
                 }
-
                 is LoginViewModel.LoginState.Error -> {
                     progressLogin.visibility = View.GONE
                     btnLogin.isEnabled = true
@@ -102,6 +103,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun irAPrincipal() {
+        val intent = Intent(this, Principal::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 
     private fun irAClientes() {

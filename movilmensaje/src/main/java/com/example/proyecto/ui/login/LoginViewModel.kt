@@ -11,18 +11,21 @@ class LoginViewModel : ViewModel() {
 
     private val repository = AuthRepository()
 
-    // Estados posibles del login
     sealed class LoginState {
         object Loading : LoginState()
-        data class Success(val token: String) : LoginState()
+        data class Success(
+            val token: String,
+            val nombre: String,
+            val rol: String
+        ) : LoginState()
         data class Error(val mensaje: String) : LoginState()
     }
 
     private val _loginState = MutableLiveData<LoginState>()
     val loginState: LiveData<LoginState> = _loginState
 
-    fun login(username: String, password: String) {
-        if (username.isBlank() || password.isBlank()) {
+    fun login(email: String, password: String) {
+        if (email.isBlank() || password.isBlank()) {
             _loginState.value = LoginState.Error("Completa todos los campos")
             return
         }
@@ -30,11 +33,15 @@ class LoginViewModel : ViewModel() {
         _loginState.value = LoginState.Loading
 
         viewModelScope.launch {
-            val result = repository.login(username, password)
+            val result = repository.login(email, password)
 
             result.fold(
-                onSuccess = { token ->
-                    _loginState.value = LoginState.Success(token)
+                onSuccess = { respuesta ->
+                    _loginState.value = LoginState.Success(
+                        token = respuesta.token,
+                        nombre = respuesta.nombre,
+                        rol = respuesta.rol
+                    )
                 },
                 onFailure = { error ->
                     _loginState.value = LoginState.Error(error.message ?: "Error desconocido")

@@ -111,7 +111,7 @@ class UsuarioDialogFragment(
                 !rbAdministrador.isChecked
 
             switchActivo.isChecked =
-                usuario.activo
+                usuario.esActivo
 
             btnEliminar.visibility =
                 View.VISIBLE

@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.proyecto.data.mock.UsuariosCatalog
+import androidx.lifecycle.lifecycleScope
+import com.example.proyecto.data.repository.AuthRepository
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.launch
 
 /**
  * Registro de una cuenta nueva.
@@ -85,132 +87,84 @@ class RegistroActivity : AppCompatActivity() {
 
         limpiarErrores()
 
-        val nombre = etNombre.text
-            ?.toString()
-            ?.trim()
-            .orEmpty()
+        val nombre = etNombre.text?.toString()?.trim().orEmpty()
+        val correo = etCorreo.text?.toString()?.trim().orEmpty()
+        val password = etPassword.text?.toString().orEmpty()
+        val confirmarPassword = etConfirmarPassword.text?.toString().orEmpty()
 
-        val correo = etCorreo.text
-            ?.toString()
-            ?.trim()
-            .orEmpty()
-
-        val password = etPassword.text
-            ?.toString()
-            .orEmpty()
-
-        val confirmarPassword =
-            etConfirmarPassword.text
-                ?.toString()
-                .orEmpty()
-
-
+        // Validaciones (las mismas que ya tienes)
         if (nombre.isBlank()) {
-
-            etNombre.error =
-                "Ingresa tu nombre"
-
+            etNombre.error = "Ingresa tu nombre"
             etNombre.requestFocus()
-
             return
         }
-
 
         if (correo.isBlank()) {
-
-            etCorreo.error =
-                "Ingresa tu correo"
-
+            etCorreo.error = "Ingresa tu correo"
             etCorreo.requestFocus()
-
             return
         }
 
-
-        if (
-            !Patterns.EMAIL_ADDRESS
-                .matcher(correo)
-                .matches()
-        ) {
-
-            etCorreo.error =
-                "Ingresa un correo válido"
-
+        if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
+            etCorreo.error = "Ingresa un correo válido"
             etCorreo.requestFocus()
-
             return
         }
-
-
-        if (UsuariosCatalog.existeCorreo(correo)) {
-
-            etCorreo.error =
-                "Ya existe una cuenta con este correo"
-
-            etCorreo.requestFocus()
-
-            return
-        }
-
 
         if (password.isBlank()) {
-
-            etPassword.error =
-                "Ingresa una contraseña"
-
+            etPassword.error = "Ingresa una contraseña"
             etPassword.requestFocus()
-
             return
         }
-
 
         if (password.length < 6) {
-
-            etPassword.error =
-                "La contraseña debe tener mínimo 6 caracteres"
-
+            etPassword.error = "La contraseña debe tener mínimo 6 caracteres"
             etPassword.requestFocus()
-
             return
         }
-
 
         if (confirmarPassword.isBlank()) {
-
-            etConfirmarPassword.error =
-                "Confirma tu contraseña"
-
+            etConfirmarPassword.error = "Confirma tu contraseña"
             etConfirmarPassword.requestFocus()
-
             return
         }
-
 
         if (password != confirmarPassword) {
-
-            etConfirmarPassword.error =
-                "Las contraseñas no coinciden"
-
+            etConfirmarPassword.error = "Las contraseñas no coinciden"
             etConfirmarPassword.requestFocus()
-
             return
         }
 
+        // Llamada real a la API
+        btnRegistrar.isEnabled = false
 
-        UsuariosCatalog.registrarUsuario(
-            nombre = nombre,
-            correo = correo
-        )
+        lifecycleScope.launch {
+            val resultado = AuthRepository().registrar(
+                name = nombre,
+                email = correo,
+                password = password,
+                role = "OPERATOR"   // por defecto todo nuevo registro es OPERATOR
+            )
 
-        Toast.makeText(
-            this,
-            "Cuenta creada. Un administrador debe " +
-                    "activarte el acceso para poder " +
-                    "iniciar sesión.",
-            Toast.LENGTH_LONG
-        ).show()
-
-        finish()
+            resultado.fold(
+                onSuccess = {
+                    Toast.makeText(
+                        this@RegistroActivity,
+                        "Cuenta creada correctamente. Ya puedes iniciar sesión.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    finish()
+                },
+                onFailure = { error ->
+                    btnRegistrar.isEnabled = true
+                    Toast.makeText(
+                        this@RegistroActivity,
+                        error.message ?: "Error al crear la cuenta",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            )
+        }
     }
 
     private fun limpiarErrores() {

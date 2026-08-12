@@ -5,7 +5,7 @@ data class Usuario(
     val nombre: String,
     val correo: String,
     val rol: String,
-    val activo: Boolean
+    val esActivo: Boolean
 )
 
 data class UsuarioRequest(
@@ -13,5 +13,12 @@ data class UsuarioRequest(
     val correo: String,
     val password: String?,
     val rol: String,
-    val activo: Boolean
+    val esActivo: Boolean
+)
+
+data class RegisterRequest(
+    val nombre: String,
+    val email: String,
+    val password: String,
+    val rol: Int = 0
 )

@@ -41,11 +41,11 @@ class UsuariosAdapter(
             tvRol.text = usuario.rol.uppercase()
 
             tvEstado.text =
-                if (usuario.activo) "ACTIVO" else "INACTIVO"
+                if (usuario.esActivo) "ACTIVO" else "INACTIVO"
 
             tvEstado.setTextColor(
                 itemView.context.getColor(
-                    if (usuario.activo) {
+                    if (usuario.esActivo) {
                         android.R.color.holo_green_dark
                     } else {
                         android.R.color.darker_gray

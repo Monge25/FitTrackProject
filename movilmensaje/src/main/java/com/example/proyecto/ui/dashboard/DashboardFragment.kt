@@ -220,7 +220,7 @@ class DashboardFragment : Fragment() {
 
         tvTotalEntrenadores.text =
             UsuariosCatalog.usuarios
-                .count { it.activo }
+                .count { it.esActivo }
                 .toString()
 
         // CALENDARIO: entrenamientos programados que faltan por completar

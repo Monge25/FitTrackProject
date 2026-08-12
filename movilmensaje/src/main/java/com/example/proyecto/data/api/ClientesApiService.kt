@@ -5,6 +5,7 @@ import com.example.proyecto.data.model.Cliente
 import com.example.proyecto.data.model.ClienteRequest
 import com.example.proyecto.data.model.LoginRequest
 import com.example.proyecto.data.model.LoginResponse
+import com.example.proyecto.data.model.RegisterRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -16,8 +17,10 @@ import retrofit2.http.Path
 
 interface ClientesApiService {
     // Autentificación
-    @POST("api/auth/login")
+    @POST("api/Auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+    @POST("api/Auth/register")
+    suspend fun registrar(@Body request: RegisterRequest): Response<Any>
 
     // Obtener Clientes
     @GET("api/clientes")
