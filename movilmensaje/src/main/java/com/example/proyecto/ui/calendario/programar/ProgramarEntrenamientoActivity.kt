@@ -195,7 +195,7 @@ class ProgramarEntrenamientoActivity :
 
         adapter =
             EjercicioProgramadoAdapter(
-                ejercicios = emptyList(),
+                ejercicios = mutableListOf(),
                 onEditar = { ejercicio ->
                     mostrarDialogEjercicio(
                         ejercicio
@@ -771,17 +771,13 @@ class ProgramarEntrenamientoActivity :
         finish()
     }
 
-    private fun obtenerDatosRutina(
-        nombre: String
-    ): DatosRutina {
-
-        val rutina =
-            RutinasCatalog.buscarPorNombre(nombre)
-                ?: return DatosRutina(
-                    id = RutinasCatalog.rutinaPersonalizada.id,
-                    descripcion = RutinasCatalog.rutinaPersonalizada.descripcion,
-                    nivel = RutinasCatalog.rutinaPersonalizada.nivel
-                )
+    private fun obtenerDatosRutina(nombre: String): DatosRutina {
+        val rutina = RutinasCatalog.buscarPorNombre(nombre)
+            ?: return DatosRutina(
+                id = RutinasCatalog.rutinaPersonalizada.id,
+                descripcion = RutinasCatalog.rutinaPersonalizada.descripcion,
+                nivel = RutinasCatalog.rutinaPersonalizada.nivel
+            )
 
         return DatosRutina(
             id = rutina.id,
@@ -789,10 +785,10 @@ class ProgramarEntrenamientoActivity :
             nivel = rutina.nivel
         )
     }
+    }
 
     data class DatosRutina(
         val id: Int,
         val descripcion: String,
         val nivel: String
     )
-}

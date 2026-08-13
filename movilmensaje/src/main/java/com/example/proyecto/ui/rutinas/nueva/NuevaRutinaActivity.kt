@@ -17,6 +17,13 @@ import com.example.proyecto.data.model.EjercicioProgramado
 import com.example.proyecto.ui.calendario.programar.EjercicioProgramadoAdapter
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import androidx.lifecycle.lifecycleScope
+import com.example.proyecto.data.model.ActualizarRutinaRequest
+import com.example.proyecto.data.model.CrearEjercicioRequest
+import com.example.proyecto.data.model.CrearRutinaRequest
+import com.example.proyecto.data.repository.RutinasRepository
+import com.example.proyecto.utils.TokenManager
+import kotlinx.coroutines.launch
 
 class NuevaRutinaActivity : AppCompatActivity() {
 
@@ -48,9 +55,6 @@ class NuevaRutinaActivity : AppCompatActivity() {
         intent.getIntExtra(EXTRA_RUTINA_ID, -1)
     }
 
-    private val rutinaExistente
-        get() = RutinasCatalog.buscarPorId(rutinaIdEditar)
-
     private val niveles = listOf(
         "Principiante",
         "Intermedio",
@@ -81,38 +85,55 @@ class NuevaRutinaActivity : AppCompatActivity() {
         configurarEventos()
 
         cargarRutinaExistenteSiAplica()
-
-        actualizarPantallaEjercicios()
     }
 
     private fun cargarRutinaExistenteSiAplica() {
-
-        val rutina = rutinaExistente
-            ?: return
+        if (rutinaIdEditar == -1) return
 
         tvTitulo.text = "Editar rutina"
-
-        tvSubtitulo.text =
-            "Modifica los datos de \"${rutina.nombre}\"."
-
+        tvSubtitulo.text = "Modifica los datos de tu rutina."
         btnGuardarRutina.text = "Guardar cambios"
 
-        etNombreRutina.setText(rutina.nombre)
+        val nombreExtra = intent.getStringExtra("RUTINA_NOMBRE") ?: ""
+        val nivelExtra = intent.getIntExtra("RUTINA_NIVEL", 0)
+        val objetivoExtra = intent.getIntExtra("RUTINA_OBJETIVO", 0)
 
-        actvNivelRutina.setText(
-            rutina.nivel,
-            false
-        )
+        etNombreRutina.setText(nombreExtra)
+        actvNivelRutina.setText(niveles.getOrElse(nivelExtra) { "Principiante" }, false)
+        actvObjetivoRutina.setText(objetivos.getOrElse(objetivoExtra) { "Hipertrofia" }, false)
 
-        actvObjetivoRutina.setText(
-            rutina.descripcion,
-            false
-        )
+        // Cargar ejercicios existentes desde la API
+        lifecycleScope.launch {
+            val token = TokenManager(this@NuevaRutinaActivity).obtenerBearer()
+            val resultado = RutinasRepository().obtenerPorId(token, rutinaIdEditar)
 
-        ejercicios.clear()
-        ejercicios.addAll(
-            rutina.ejerciciosPredeterminados
-        )
+            resultado.fold(
+                onSuccess = { rutina ->
+                    ejercicios.clear()
+                    ejercicios.addAll(
+                        rutina.ejercicios.map { ej ->
+                            EjercicioProgramado(
+                                id = ej.id.toLong(),
+                                nombre = ej.nombre,
+                                series = ej.series,
+                                repeticiones = ej.repeticiones,
+                                pesoKg = ej.peso?.toFloat() ?: 0f,
+                                descansoSegundos = ej.descanso,
+                                notas = ej.notas ?: ""
+                            )
+                        }
+                    )
+                    actualizarPantallaEjercicios()
+                },
+                onFailure = {
+                    Toast.makeText(
+                        this@NuevaRutinaActivity,
+                        "No se pudieron cargar los ejercicios",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+        }
     }
 
     private fun inicializarComponentes() {
@@ -200,7 +221,7 @@ class NuevaRutinaActivity : AppCompatActivity() {
     private fun configurarRecyclerView() {
 
         adapter = EjercicioProgramadoAdapter(
-            ejercicios = emptyList(),
+            ejercicios = mutableListOf(),
             onEditar = { ejercicio ->
                 mostrarDialogEjercicio(ejercicio)
             },
@@ -452,10 +473,12 @@ class NuevaRutinaActivity : AppCompatActivity() {
     }
 
     private fun actualizarPantallaEjercicios() {
+        android.util.Log.d("EJERCICIOS", "Lista tiene: ${ejercicios.size} elementos")
+        ejercicios.forEach { android.util.Log.d("EJERCICIOS", "- ${it.nombre}") }
 
-        adapter.actualizarLista(
-            ejercicios.toList()
-        )
+        rvEjercicios.post {
+            adapter.actualizarLista(ejercicios.toList())
+        }
 
         val estaVacio = ejercicios.isEmpty()
 
@@ -519,104 +542,116 @@ class NuevaRutinaActivity : AppCompatActivity() {
     // ================= GUARDAR RUTINA =================
 
     private fun guardarRutina() {
-
-        val nombre =
-            etNombreRutina.text
-                ?.toString()
-                ?.trim()
-                .orEmpty()
-
-        val nivel =
-            actvNivelRutina.text
-                ?.toString()
-                ?.trim()
-                .orEmpty()
-
-        val objetivo =
-            actvObjetivoRutina.text
-                ?.toString()
-                ?.trim()
-                .orEmpty()
-
+        val nombre = etNombreRutina.text?.toString()?.trim().orEmpty()
+        val nivelTexto = actvNivelRutina.text?.toString()?.trim().orEmpty()
+        val objetivoTexto = actvObjetivoRutina.text?.toString()?.trim().orEmpty()
 
         if (nombre.isBlank()) {
-
-            etNombreRutina.error =
-                "Ingresa el nombre de la rutina"
-
+            etNombreRutina.error = "Ingresa el nombre de la rutina"
             etNombreRutina.requestFocus()
-
             return
         }
 
-
-        if (nivel !in niveles) {
-
-            actvNivelRutina.error =
-                "Selecciona un nivel"
-
+        if (nivelTexto !in niveles) {
+            actvNivelRutina.error = "Selecciona un nivel"
             actvNivelRutina.requestFocus()
-
             return
         }
 
-
-        if (objetivo.isBlank()) {
-
-            actvObjetivoRutina.error =
-                "Selecciona o escribe un objetivo"
-
+        if (objetivoTexto.isBlank()) {
+            actvObjetivoRutina.error = "Selecciona un objetivo"
             actvObjetivoRutina.requestFocus()
-
             return
         }
-
 
         if (ejercicios.isEmpty()) {
-
-            Toast.makeText(
-                this,
-                "Agrega al menos un ejercicio",
-                Toast.LENGTH_SHORT
-            ).show()
-
+            Toast.makeText(this, "Agrega al menos un ejercicio", Toast.LENGTH_SHORT).show()
             return
         }
 
+        // Convertir texto a número para la API
+        val nivelNum = niveles.indexOf(nivelTexto)
+        val objetivoNum = objetivos.indexOf(objetivoTexto)
 
-        val rutinaGuardada =
-            if (rutinaExistente != null) {
+        val ejerciciosRequest = ejercicios.map { ej ->
+            CrearEjercicioRequest(
+                nombre = ej.nombre,
+                series = ej.series,
+                repeticiones = ej.repeticiones,
+                peso = if (ej.pesoKg > 0f) ej.pesoKg.toDouble() else null,
+                descanso = ej.descansoSegundos,
+                notas = ej.notas.ifBlank { null }
+            )
+        }
 
-                RutinasCatalog.actualizarRutina(
-                    id = rutinaIdEditar,
-                    nombre = nombre,
-                    descripcion = objetivo,
-                    nivel = nivel,
-                    duracion = calcularDuracionEstimada(),
-                    ejerciciosPredeterminados = ejercicios.toList()
+        btnGuardarRutina.isEnabled = false
+
+        lifecycleScope.launch {
+            val token = TokenManager(this@NuevaRutinaActivity).obtenerBearer()
+            val repository = RutinasRepository()
+
+            val resultado = if (rutinaIdEditar != -1) {
+                // 1. Actualizar datos de la rutina
+                val resultadoRutina = repository.actualizar(
+                    token, rutinaIdEditar,
+                    ActualizarRutinaRequest(nombre, nivelNum, objetivoNum)
                 )
 
-            } else {
+                if (resultadoRutina.isSuccess) {
+                    // 2. Sincronizar ejercicios — actualizar los que tienen id real (vinieron de la API)
+                    //    y agregar los nuevos (id generado localmente con timestamp, mayor que Int.MAX_VALUE no existe en BD)
+                    for (ej in ejercicios) {
+                        val tieneIdReal = ej.id <= Int.MAX_VALUE && ej.id > 0 &&
+                                ej.id != ej.id.coerceAtMost(System.currentTimeMillis())
 
-                RutinasCatalog.agregarRutina(
-                    nombre = nombre,
-                    descripcion = objetivo,
-                    nivel = nivel,
-                    duracion = calcularDuracionEstimada(),
-                    ejerciciosPredeterminados = ejercicios.toList()
+                        val request = CrearEjercicioRequest(
+                            nombre = ej.nombre,
+                            series = ej.series,
+                            repeticiones = ej.repeticiones,
+                            peso = if (ej.pesoKg > 0f) ej.pesoKg.toDouble() else null,
+                            descanso = ej.descansoSegundos,
+                            notas = ej.notas.ifBlank { null }
+                        )
+
+                        // Si el id cabe en un Int normal es un ejercicio existente en la BD
+                        if (ej.id in 1..999999) {
+                            repository.actualizarEjercicio(token, rutinaIdEditar, ej.id.toInt(), request)
+                        } else {
+                            // Es nuevo, lo insertamos
+                            repository.agregarEjercicio(token, rutinaIdEditar, request)
+                        }
+                    }
+                    resultadoRutina
+                } else {
+                    resultadoRutina
+                }
+            } else {
+                repository.crear(
+                    token,
+                    CrearRutinaRequest(nombre, nivelNum, objetivoNum, ejerciciosRequest)
                 )
             }
 
-        Toast.makeText(
-            this,
-            "Rutina \"${rutinaGuardada?.nombre ?: nombre}\" guardada",
-            Toast.LENGTH_SHORT
-        ).show()
-
-
-        setResult(RESULT_OK)
-
-        finish()
+            resultado.fold(
+                onSuccess = {
+                    Toast.makeText(
+                        this@NuevaRutinaActivity,
+                        "Rutina \"$nombre\" guardada",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    setResult(RESULT_OK)
+                    finish()
+                },
+                onFailure = { error ->
+                    btnGuardarRutina.isEnabled = true
+                    Toast.makeText(
+                        this@NuevaRutinaActivity,
+                        error.message ?: "Error al guardar",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            )
+        }
     }
 
     companion object {

@@ -11,12 +11,13 @@ import com.google.android.material.button.MaterialButton
 import java.util.Locale
 
 class EjercicioProgramadoAdapter(
-    private var ejercicios: List<EjercicioProgramado>,
+    ejercicios: MutableList<EjercicioProgramado>,
     private val onEditar: (EjercicioProgramado) -> Unit,
     private val onEliminar: (EjercicioProgramado) -> Unit
 ) : RecyclerView.Adapter<
         EjercicioProgramadoAdapter.EjercicioViewHolder
         >() {
+    private var ejercicios: MutableList<EjercicioProgramado> = ejercicios.toMutableList()
 
     inner class EjercicioViewHolder(
         itemView: View
@@ -118,11 +119,15 @@ class EjercicioProgramadoAdapter(
     override fun getItemCount(): Int =
         ejercicios.size
 
-    fun actualizarLista(
-        nuevaLista: List<EjercicioProgramado>
-    ) {
-        ejercicios = nuevaLista
-        notifyDataSetChanged()
+    fun actualizarLista(nuevaLista: List<EjercicioProgramado>) {
+        android.util.Log.d("ADAPTER", "actualizarLista llamado con ${nuevaLista.size} elementos")
+        val oldSize = ejercicios.size
+        ejercicios = nuevaLista.toMutableList()
+        if (oldSize == 0) {
+            notifyItemRangeInserted(0, ejercicios.size)
+        } else {
+            notifyDataSetChanged()
+        }
     }
 
     private fun formatearPeso(
