@@ -1,19 +1,19 @@
 package com.example.proyecto.data.model
 
 data class Usuario(
-    val id: Int,
-    val nombre: String,
-    val correo: String,
-    val rol: String,
-    val esActivo: Boolean
+    val id: Int = 0,
+    val nombre: String = "",
+    val correo: String = "",
+    val rol: Int = 1,
+    val esActivo: Boolean = true
 )
 
-data class UsuarioRequest(
+data class ActualizarUsuarioRequest(
     val nombre: String,
-    val correo: String,
-    val password: String?,
-    val rol: String,
-    val esActivo: Boolean
+    val email: String,
+    val rol: Int,
+    val esActivo: Boolean,
+    val password: String? = null
 )
 
 data class RegisterRequest(

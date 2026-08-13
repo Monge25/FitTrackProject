@@ -237,45 +237,19 @@ class NuevoUsuarioActivity : AppCompatActivity() {
         devolverUsuario(
             nombre = nombre,
             correo = correo,
+            password = password,
             rol = rol
         )
     }
 
-    private fun devolverUsuario(
-        nombre: String,
-        correo: String,
-        rol: String
-    ) {
-
+    private fun devolverUsuario(nombre: String, correo: String, password: String, rol: String) {
         val resultado = Intent().apply {
-
-            putExtra(
-                EXTRA_NOMBRE,
-                nombre
-            )
-
-            putExtra(
-                EXTRA_CORREO,
-                correo
-            )
-
-            putExtra(
-                EXTRA_ROL,
-                rol
-            )
+            putExtra(EXTRA_NOMBRE,   nombre)
+            putExtra(EXTRA_CORREO,   correo)
+            putExtra(EXTRA_PASSWORD, password)
+            putExtra(EXTRA_ROL,      rol)
         }
-
-        setResult(
-            RESULT_OK,
-            resultado
-        )
-
-        Toast.makeText(
-            this,
-            "Usuario guardado correctamente",
-            Toast.LENGTH_SHORT
-        ).show()
-
+        setResult(RESULT_OK, resultado)
         finish()
     }
 
@@ -307,5 +281,8 @@ class NuevoUsuarioActivity : AppCompatActivity() {
 
         const val EXTRA_ROL =
             "EXTRA_ROL"
+
+        const val EXTRA_PASSWORD =
+            "EXTRA_PASSWORD"
     }
 }

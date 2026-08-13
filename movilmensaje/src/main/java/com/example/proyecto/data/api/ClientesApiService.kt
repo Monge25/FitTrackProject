@@ -1,6 +1,7 @@
 package com.example.proyecto.data.api
 
 import com.example.proyecto.data.model.ActualizarRutinaRequest
+import com.example.proyecto.data.model.ActualizarUsuarioRequest
 import com.example.proyecto.data.model.BuscarClienteResponse
 import com.example.proyecto.data.model.Cliente
 import com.example.proyecto.data.model.ClienteRequest
@@ -11,6 +12,7 @@ import com.example.proyecto.data.model.LoginRequest
 import com.example.proyecto.data.model.LoginResponse
 import com.example.proyecto.data.model.RegisterRequest
 import com.example.proyecto.data.model.Rutina
+import com.example.proyecto.data.model.Usuario
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -108,5 +110,18 @@ interface ClientesApiService {
         @Header("Authorization") token: String,
         @Path("id") rutinaId: Int,
         @Path("ejercicioId") ejercicioId: Int
+    ): Response<Any>
+
+    // ── Usuarios ──────────────────────────────────────────────
+    @GET("api/auth/usuarios")
+    suspend fun getUsuarios(
+        @Header("Authorization") token: String
+    ): Response<List<Usuario>>
+
+    @PUT("api/auth/usuarios/{id}")
+    suspend fun actualizarUsuario(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Body request: ActualizarUsuarioRequest
     ): Response<Any>
 }

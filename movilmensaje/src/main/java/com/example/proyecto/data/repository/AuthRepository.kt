@@ -1,9 +1,11 @@
 package com.example.proyecto.data.repository
 
 import com.example.proyecto.data.api.RetrofitInstance
+import com.example.proyecto.data.model.ActualizarUsuarioRequest
 import com.example.proyecto.data.model.LoginRequest
 import com.example.proyecto.data.model.LoginResponse
 import com.example.proyecto.data.model.RegisterRequest
+import com.example.proyecto.data.model.Usuario
 
 class AuthRepository {
 
@@ -38,6 +40,36 @@ class AuthRepository {
             } else {
                 Result.failure(Exception("No se pudo crear el usuario"))
             }
+        } catch (e: Exception) {
+            Result.failure(Exception("Error de conexión: ${e.message}"))
+        }
+    }
+
+    suspend fun obtenerUsuarios(token: String): Result<List<Usuario>> {
+        return try {
+            val response = RetrofitInstance.api.getUsuarios(token)
+            android.util.Log.d("USUARIOS", "Body raw: ${response.body()}")
+            if (response.isSuccessful && response.body() != null)
+                Result.success(response.body()!!)
+            else
+                Result.failure(Exception("No se pudo cargar la lista de usuarios"))
+        } catch (e: Exception) {
+            android.util.Log.d("USUARIOS", "Excepción: ${e.message}")
+            Result.failure(Exception("Error de conexión: ${e.message}"))
+        }
+    }
+
+    suspend fun actualizarUsuario(
+        token: String,
+        id: Int,
+        request: ActualizarUsuarioRequest
+    ): Result<Unit> {
+        return try {
+            val response = RetrofitInstance.api.actualizarUsuario(token, id, request)
+            if (response.isSuccessful)
+                Result.success(Unit)
+            else
+                Result.failure(Exception("No se pudo actualizar el usuario"))
         } catch (e: Exception) {
             Result.failure(Exception("Error de conexión: ${e.message}"))
         }

@@ -218,10 +218,7 @@ class DashboardFragment : Fragment() {
         tvTotalRutinas.text =
             RutinasCatalog.rutinas.size.toString()
 
-        tvTotalEntrenadores.text =
-            UsuariosCatalog.usuarios
-                .count { it.esActivo }
-                .toString()
+        tvTotalEntrenadores.text = "…"
 
         // CALENDARIO: entrenamientos programados que faltan por completar
 

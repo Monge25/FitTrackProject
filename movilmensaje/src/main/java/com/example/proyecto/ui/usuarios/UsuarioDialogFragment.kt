@@ -101,11 +101,7 @@ class UsuarioDialogFragment(
             layoutPassword.hint =
                 "Nueva contraseña (opcional)"
 
-            rbAdministrador.isChecked =
-                usuario.rol.equals(
-                    "ADMINISTRADOR",
-                    ignoreCase = true
-                )
+            rbAdministrador.isChecked = usuario.rol == 0
 
             rbOperador.isChecked =
                 !rbAdministrador.isChecked
