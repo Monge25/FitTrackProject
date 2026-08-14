@@ -199,7 +199,7 @@
 
             </LinearLayout>
 
-            <!-- ================= LISTA ================= -->
+            <!-- ================= LISTA: ACTIVAS ================= -->
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRutinas"
@@ -210,8 +210,92 @@
                 android:nestedScrollingEnabled="false"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:paddingBottom="16dp"
                 tools:listitem="@layout/item_rutina"/>
+
+            <TextView
+                android:id="@+id/tvRutinasActivasVacio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:background="@drawable/edittext_dark"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="No tienes rutinas activas."
+                android:textColor="#8D99A8"
+                android:textSize="14sp"
+                android:visibility="gone"/>
+
+            <!-- ================= TÍTULO: DESACTIVADAS ================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="26dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rutinas desactivadas"
+                        android:textColor="#FFFFFF"
+                        android:textSize="22sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Ya no aparecen para los clientes"
+                        android:textColor="#8D99A8"
+                        android:textSize="13sp"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/fondo_chip_translucido"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="5dp"
+                    android:text="INACTIVAS"
+                    android:textColor="#8D99A8"
+                    android:textSize="10sp"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRutinasDesactivadas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                tools:listitem="@layout/item_rutina"/>
+
+            <TextView
+                android:id="@+id/tvRutinasDesactivadasVacio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:background="@drawable/edittext_dark"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="No tienes rutinas desactivadas."
+                android:textColor="#8D99A8"
+                android:textSize="14sp"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

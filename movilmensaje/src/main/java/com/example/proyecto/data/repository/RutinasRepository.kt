@@ -69,6 +69,18 @@ class RutinasRepository {
         }
     }
 
+    suspend fun activar(token: String, id: Int): Result<Unit> {
+        return try {
+            val response = RetrofitInstance.api.activarRutina(token, id)
+            if (response.isSuccessful)
+                Result.success(Unit)
+            else
+                Result.failure(Exception("No se pudo activar la rutina"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Error de conexión: ${e.message}"))
+        }
+    }
+
     suspend fun agregarEjercicio(
         token: String, rutinaId: Int, request: CrearEjercicioRequest
     ): Result<EjercicioApi> {

@@ -70,6 +70,32 @@ class UsuariosFragment : Fragment() {
         configurarBotonNuevo()
         observarViewModel()
         recargarUsuarios()
+        verificarPermiso()
+    }
+
+    /**
+     * Defensa adicional: Principal ya oculta esta pestaña y bloquea
+     * la navegación hacia ella si el rol no es administrador, pero
+     * por si se llegara aquí por otro camino, no se deja ver ni usar
+     * nada real de la pantalla.
+     */
+    private fun verificarPermiso() {
+        lifecycleScope.launch {
+            val rol = tokenManager.obtenerRol()
+
+            if (!com.example.proyecto.utils.Permisos.puedeVerUsuarios(rol)) {
+                Toast.makeText(
+                    requireContext(),
+                    "No tienes permiso para ver esta sección",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                parentFragmentManager
+                    .beginTransaction()
+                    .remove(this@UsuariosFragment)
+                    .commitAllowingStateLoss()
+            }
+        }
     }
 
     private fun recargarUsuarios() {
@@ -140,7 +166,7 @@ class UsuariosFragment : Fragment() {
     private fun abrirModalUsuario(usuario: Usuario) {
         UsuarioDialogFragment(
             usuario = usuario,
-            onGuardar = { usuarioExistente, nombre, correo, password, rol, activo ->
+            onGuardar = { usuarioExistente, nombre, correo, rol, activo ->
                 usuarioExistente ?: return@UsuarioDialogFragment
                 lifecycleScope.launch {
                     val token = tokenManager.obtenerBearer()
@@ -151,7 +177,7 @@ class UsuariosFragment : Fragment() {
                         correo   = correo,
                         rol      = rol,
                         esActivo = activo,
-                        password = password.ifBlank { null }
+                        password = null
                     )
                 }
             },

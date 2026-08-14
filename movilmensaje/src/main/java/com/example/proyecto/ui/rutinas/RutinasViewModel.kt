@@ -17,6 +17,7 @@ class RutinasViewModel : ViewModel() {
         object Idle : RutinasState()
         data class Error(val mensaje: String) : RutinasState()
         data class DesactivadaExitosa(val mensaje: String) : RutinasState()
+        data class ActivadaExitosa(val mensaje: String) : RutinasState()
     }
 
     private val _rutinas = MutableLiveData<List<Rutina>>(emptyList())
@@ -45,11 +46,31 @@ class RutinasViewModel : ViewModel() {
             repository.desactivar(token, rutinaId).fold(
                 onSuccess = {
                     _state.value = RutinasState.DesactivadaExitosa("Rutina desactivada")
-                    // Quitar de la lista local inmediatamente
-                    _rutinas.value = _rutinas.value?.filter { it.id != rutinaId }
+                    // Se marca como inactiva en vez de quitarla de la
+                    // lista, para que pase a la sección de
+                    // "desactivadas" en vez de desaparecer.
+                    _rutinas.value = _rutinas.value?.map {
+                        if (it.id == rutinaId) it.copy(esActivo = false) else it
+                    }
                 },
                 onFailure = {
                     _state.value = RutinasState.Error(it.message ?: "Error al desactivar")
+                }
+            )
+        }
+    }
+
+    fun activarRutina(token: String, rutinaId: Int) {
+        viewModelScope.launch {
+            repository.activar(token, rutinaId).fold(
+                onSuccess = {
+                    _state.value = RutinasState.ActivadaExitosa("Rutina activada")
+                    _rutinas.value = _rutinas.value?.map {
+                        if (it.id == rutinaId) it.copy(esActivo = true) else it
+                    }
+                },
+                onFailure = {
+                    _state.value = RutinasState.Error(it.message ?: "Error al activar")
                 }
             )
         }

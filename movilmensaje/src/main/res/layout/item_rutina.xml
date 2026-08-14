@@ -98,11 +98,21 @@
 
         </LinearLayout>
 
+        <!-- Estado -->
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchRutinaActiva"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:thumbTint="#2F7BFF"
+            app:trackTint="#4A5A75"/>
+
         <!-- Flecha -->
 
         <ImageView
             android:layout_width="26dp"
             android:layout_height="26dp"
+            android:layout_marginStart="6dp"
             android:contentDescription="Ver rutina"
             android:src="@drawable/ic_arrow_right"
             app:tint="#6FA7FF"/>

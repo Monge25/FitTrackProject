@@ -14,6 +14,7 @@ import com.example.proyecto.data.mock.UsuariosCatalog
 import com.example.proyecto.data.repository.CalendarioRepository
 import com.example.proyecto.data.repository.ClientesRepository
 import com.example.proyecto.data.repository.ProgresoRepository
+import com.example.proyecto.utils.Permisos
 import com.example.proyecto.utils.TokenManager
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
@@ -199,6 +200,11 @@ class DashboardFragment : Fragment() {
 
         val tokenManager = TokenManager(requireContext())
 
+        // Progreso está oculta para todos por ahora — su tarjeta de
+        // acceso rápido tampoco se muestra (llevaría a una pantalla
+        // inalcanzable).
+        cardProgreso.visibility = View.GONE
+
         viewLifecycleOwner.lifecycleScope.launch {
 
             val nombre = tokenManager.obtenerNombre()
@@ -207,6 +213,21 @@ class DashboardFragment : Fragment() {
             tvSaludo.text = "¡Hola, $nombre!"
 
             tvRolUsuario.text = "$rol de FitTrack"
+
+            // Los accesos a Usuarios no se muestran si el rol no
+            // tiene permiso para esa pantalla (Principal.irAPantalla
+            // también lo bloquea, esto es solo para no dejar
+            // botones visibles que no hacen nada).
+            val puedeVerUsuarios = Permisos.puedeVerUsuarios(rol)
+
+            cardClientes.visibility =
+                if (puedeVerUsuarios) View.VISIBLE else View.GONE
+
+            cardEntrenadores.visibility =
+                if (puedeVerUsuarios) View.VISIBLE else View.GONE
+
+            btnVerClientes.visibility =
+                if (puedeVerUsuarios) View.VISIBLE else View.GONE
         }
     }
 

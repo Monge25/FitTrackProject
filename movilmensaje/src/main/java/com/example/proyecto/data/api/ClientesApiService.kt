@@ -90,6 +90,15 @@ interface ClientesApiService {
         @Path("id") id: Int
     ): Response<Any>
 
+    // OJO: este endpoint es una SUPOSICIÓN (simétrico al de
+    // desactivar) — confirma con tu backend que la ruta real sea
+    // esta antes de dar la función de "reactivar" por buena.
+    @PATCH("api/rutinas/{id}/activar")
+    suspend fun activarRutina(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Any>
+
     @POST("api/rutinas/{id}/ejercicios")
     suspend fun agregarEjercicio(
         @Header("Authorization") token: String,

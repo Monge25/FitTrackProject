@@ -24,12 +24,22 @@
             android:padding="24dp">
 
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.15"
+                android:text="EQUIPO FITTRACK"
+                android:textColor="#2F7BFF"
+                android:textSize="11sp"
+                android:textStyle="bold"/>
+
+            <TextView
                 android:id="@+id/tvTituloDialogUsuario"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="Nuevo usuario"
                 android:textColor="#FFFFFF"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:textStyle="bold"/>
 
             <TextView
@@ -49,82 +59,78 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="22dp">
+            android:padding="20dp">
+
+            <!-- NOMBRE -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre completo"
+                android:textColor="#B7C0CD"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nombre completo"
-                app:boxBackgroundColor="#151B26"
-                app:boxStrokeColor="#2F7BFF"
-                app:hintTextColor="#8D99A8"
-                app:boxCornerRadiusTopStart="18dp"
-                app:boxCornerRadiusTopEnd="18dp"
+                android:layout_marginTop="8dp"
+                app:boxBackgroundColor="#0B0F16"
+                app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
-                app:boxCornerRadiusBottomEnd="18dp">
+                app:boxCornerRadiusTopEnd="18dp"
+                app:boxCornerRadiusTopStart="18dp"
+                app:boxStrokeColor="@color/selector_box_stroke"
+                app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etNombreUsuarioDialog"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="56dp"
+                    android:hint="Ej. Alexa Gastélum"
                     android:inputType="textPersonName"
+                    android:paddingStart="16dp"
+                    android:singleLine="true"
                     android:textColor="#FFFFFF"
-                    android:textColorHint="#8D99A8"/>
+                    android:textColorHint="#5B6675"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- CORREO -->
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Correo electrónico"
+                android:textColor="#B7C0CD"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Correo electrónico"
-                app:boxBackgroundColor="#151B26"
-                app:boxStrokeColor="#2F7BFF"
-                app:hintTextColor="#8D99A8"
-                app:boxCornerRadiusTopStart="18dp"
-                app:boxCornerRadiusTopEnd="18dp"
+                android:layout_marginTop="8dp"
+                app:boxBackgroundColor="#0B0F16"
+                app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
-                app:boxCornerRadiusBottomEnd="18dp">
+                app:boxCornerRadiusTopEnd="18dp"
+                app:boxCornerRadiusTopStart="18dp"
+                app:boxStrokeColor="@color/selector_box_stroke"
+                app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etCorreoUsuarioDialog"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="56dp"
+                    android:hint="correo@fittrack.com"
                     android:inputType="textEmailAddress"
+                    android:paddingStart="16dp"
+                    android:singleLine="true"
                     android:textColor="#FFFFFF"
-                    android:textColorHint="#8D99A8"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- CONTRASEÑA -->
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/layoutPasswordUsuario"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Contraseña"
-                app:boxBackgroundColor="#151B26"
-                app:boxStrokeColor="#2F7BFF"
-                app:hintTextColor="#8D99A8"
-                app:endIconMode="password_toggle"
-                app:endIconTint="#2F7BFF"
-                app:boxCornerRadiusTopStart="18dp"
-                app:boxCornerRadiusTopEnd="18dp"
-                app:boxCornerRadiusBottomStart="18dp"
-                app:boxCornerRadiusBottomEnd="18dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPasswordUsuarioDialog"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:textColor="#FFFFFF"/>
+                    android:textColorHint="#5B6675"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -136,50 +142,78 @@
                 android:layout_marginTop="22dp"
                 android:text="Rol del usuario"
                 android:textColor="#FFFFFF"
-                android:textSize="15sp"
+                android:textSize="16sp"
                 android:textStyle="bold"/>
 
-            <RadioGroup
-                android:id="@+id/rgRolUsuario"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:orientation="horizontal">
+                app:cardBackgroundColor="#151B26"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#263242"
+                app:strokeWidth="1dp">
 
-                <RadioButton
-                    android:id="@+id/rbAdministrador"
-                    android:layout_width="0dp"
+                <RadioGroup
+                    android:id="@+id/rgRolUsuario"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:buttonTint="#2F7BFF"
-                    android:text="Administrador"
-                    android:textColor="#FFFFFF"/>
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
 
-                <RadioButton
-                    android:id="@+id/rbOperador"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:buttonTint="#2F7BFF"
-                    android:checked="true"
-                    android:text="Operador"
-                    android:textColor="#FFFFFF"/>
+                    <RadioButton
+                        android:id="@+id/rbAdministrador"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:buttonTint="#2F7BFF"
+                        android:text="Administrador"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"/>
 
-            </RadioGroup>
+                    <RadioButton
+                        android:id="@+id/rbOperador"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:buttonTint="#2F7BFF"
+                        android:checked="true"
+                        android:text="Operador"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"/>
 
-            <!-- SWITCH -->
+                </RadioGroup>
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switchUsuarioActivo"
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ESTADO -->
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:checked="true"
-                android:text="Usuario activo"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                app:thumbTint="#2F7BFF"
-                app:trackTint="#4A5A75"/>
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="#151B26"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#263242"
+                app:strokeWidth="1dp">
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchUsuarioActivo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="14dp"
+                    android:text="Usuario activo"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    app:thumbTint="#2F7BFF"
+                    app:trackTint="#4A5A75"/>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <ProgressBar
                 android:id="@+id/progressDialogUsuario"
@@ -196,7 +230,7 @@
                 android:id="@+id/btnGuardarUsuarioDialog"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="26dp"
                 android:text="Guardar usuario"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
@@ -212,7 +246,7 @@
                 android:id="@+id/btnEliminarUsuarioDialog"
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="12dp"
                 android:text="Eliminar usuario"
                 android:textAllCaps="false"
                 android:textColor="#FF6B81"
@@ -230,7 +264,7 @@
                 android:id="@+id/btnCancelarUsuarioDialog"
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginBottom="12dp"
                 android:text="Cancelar"
                 android:textAllCaps="false"

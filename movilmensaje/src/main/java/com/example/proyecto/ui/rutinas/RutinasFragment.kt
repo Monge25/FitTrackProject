@@ -20,15 +20,21 @@ import com.example.proyecto.ui.rutinas.nueva.NuevaRutinaActivity
 import com.example.proyecto.utils.TokenManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class RutinasFragment : Fragment() {
 
     private val viewModel: RutinasViewModel by viewModels()
     private lateinit var tokenManager: TokenManager
-    private lateinit var adapter: RutinasAdapter
+    private lateinit var adapterActivas: RutinasAdapter
+    private lateinit var adapterDesactivadas: RutinasAdapter
 
+    private lateinit var rootView: View
     private lateinit var rvRutinas: RecyclerView
+    private lateinit var rvRutinasDesactivadas: RecyclerView
+    private lateinit var tvRutinasActivasVacio: TextView
+    private lateinit var tvRutinasDesactivadasVacio: TextView
     private lateinit var btnNuevaRutina: ExtendedFloatingActionButton
     private lateinit var btnVerRutinaDestacada: MaterialButton
     private lateinit var tvRutinaDestacadaNombre: TextView
@@ -51,10 +57,11 @@ class RutinasFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        rootView = view
         tokenManager = TokenManager(requireContext())
 
         inicializarComponentes(view)
-        configurarRecyclerView()
+        configurarRecyclerViews()
         configurarEventos()
         observarViewModel()
         recargarRutinas()
@@ -69,6 +76,9 @@ class RutinasFragment : Fragment() {
 
     private fun inicializarComponentes(view: View) {
         rvRutinas = view.findViewById(R.id.rvRutinas)
+        rvRutinasDesactivadas = view.findViewById(R.id.rvRutinasDesactivadas)
+        tvRutinasActivasVacio = view.findViewById(R.id.tvRutinasActivasVacio)
+        tvRutinasDesactivadasVacio = view.findViewById(R.id.tvRutinasDesactivadasVacio)
         btnNuevaRutina = view.findViewById(R.id.btnNuevaRutina)
         btnVerRutinaDestacada = view.findViewById(R.id.btnVerRutinaDestacada)
         tvRutinaDestacadaNombre = view.findViewById(R.id.tvRutinaDestacadaNombre)
@@ -76,19 +86,32 @@ class RutinasFragment : Fragment() {
         tvCantidadRutinas = view.findViewById(R.id.tvCantidadRutinas)
     }
 
-    private fun configurarRecyclerView() {
-        adapter = RutinasAdapter(emptyList()) { rutina ->
-            abrirEditarRutina(rutina)
-        }
+    private fun configurarRecyclerViews() {
+
+        adapterActivas = RutinasAdapter(
+            rutinas = emptyList(),
+            onRutinaClick = { abrirEditarRutina(it) },
+            onToggleActivo = { rutina, activo -> cambiarEstado(rutina, activo) }
+        )
+
+        adapterDesactivadas = RutinasAdapter(
+            rutinas = emptyList(),
+            onRutinaClick = { abrirEditarRutina(it) },
+            onToggleActivo = { rutina, activo -> cambiarEstado(rutina, activo) }
+        )
+
         rvRutinas.layoutManager = LinearLayoutManager(requireContext())
-        rvRutinas.adapter = adapter
+        rvRutinas.adapter = adapterActivas
+
+        rvRutinasDesactivadas.layoutManager = LinearLayoutManager(requireContext())
+        rvRutinasDesactivadas.adapter = adapterDesactivadas
     }
 
     private fun configurarEventos() {
         btnNuevaRutina.setOnClickListener { abrirNuevaRutina() }
 
         btnVerRutinaDestacada.setOnClickListener {
-            viewModel.rutinas.value?.firstOrNull()?.let {
+            viewModel.rutinas.value?.firstOrNull { it.esActivo }?.let {
                 abrirDetalleRutina(it)
             }
         }
@@ -96,20 +119,19 @@ class RutinasFragment : Fragment() {
 
     private fun observarViewModel() {
         viewModel.rutinas.observe(viewLifecycleOwner) { lista ->
-            adapter.actualizarLista(lista)
 
-            // El RecyclerView vive dentro de un ScrollView con altura
-            // "wrap_content"; cuando los datos llegan después del
-            // primer dibujado (como aquí, que vienen del backend de
-            // forma asíncrona), se queda con el tamaño viejo si no se
-            // le pide explícitamente que se vuelva a medir.
-            rvRutinas.post {
-                rvRutinas.requestLayout()
-            }
+            val activas = lista.filter { it.esActivo }
+            val desactivadas = lista.filterNot { it.esActivo }
 
-            tvCantidadRutinas.text = "${lista.size} planes disponibles"
+            adapterActivas.actualizarLista(activas)
+            adapterDesactivadas.actualizarLista(desactivadas)
 
-            val destacada = lista.firstOrNull()
+            mostrarSeccion(rvRutinas, tvRutinasActivasVacio, activas)
+            mostrarSeccion(rvRutinasDesactivadas, tvRutinasDesactivadasVacio, desactivadas)
+
+            tvCantidadRutinas.text = "${activas.size} planes activos"
+
+            val destacada = activas.firstOrNull()
             if (destacada != null) {
                 tvRutinaDestacadaNombre.text = destacada.nombre.uppercase()
                 tvRutinaDestacadaDescripcion.text = nivelTexto(destacada.nivel)
@@ -123,12 +145,58 @@ class RutinasFragment : Fragment() {
             when (state) {
                 is RutinasViewModel.RutinasState.Error ->
                     Toast.makeText(requireContext(), state.mensaje, Toast.LENGTH_LONG).show()
-                is RutinasViewModel.RutinasState.DesactivadaExitosa ->
-                    Toast.makeText(requireContext(), state.mensaje, Toast.LENGTH_SHORT).show()
                 else -> {}
             }
             if (state !is RutinasViewModel.RutinasState.Idle)
                 viewModel.resetState()
+        }
+    }
+
+    private fun mostrarSeccion(
+        recyclerView: RecyclerView,
+        vacioTextView: TextView,
+        lista: List<Rutina>
+    ) {
+        val estaVacio = lista.isEmpty()
+        recyclerView.visibility = if (estaVacio) View.GONE else View.VISIBLE
+        vacioTextView.visibility = if (estaVacio) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * Se llama al mover el Switch de una tarjeta, sea para
+     * desactivar (con opción de deshacer vía Snackbar, ya que es más
+     * fácil que se toque sin querer) o para reactivar (directo, sin
+     * deshacer, ya que basta con volver a apagar el switch).
+     */
+    private fun cambiarEstado(rutina: Rutina, activo: Boolean) {
+        lifecycleScope.launch {
+            val token = tokenManager.obtenerBearer()
+
+            if (activo) {
+                viewModel.activarRutina(token, rutina.id)
+
+                Snackbar.make(
+                    rootView,
+                    "\"${rutina.nombre}\" está activa de nuevo",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+
+            } else {
+                viewModel.desactivarRutina(token, rutina.id)
+
+                Snackbar.make(
+                    rootView,
+                    "\"${rutina.nombre}\" ya no aparece para los clientes",
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction("Deshacer") {
+                        lifecycleScope.launch {
+                            val tokenDeshacer = tokenManager.obtenerBearer()
+                            viewModel.activarRutina(tokenDeshacer, rutina.id)
+                        }
+                    }
+                    .show()
+            }
         }
     }
 

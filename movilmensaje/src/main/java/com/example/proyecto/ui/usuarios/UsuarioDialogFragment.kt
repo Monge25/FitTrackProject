@@ -8,21 +8,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.RadioButton
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.proyecto.data.model.Usuario
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 
+/**
+ * Este diálogo es solo para EDITAR un usuario existente
+ * (UsuariosFragment.abrirModalUsuario siempre lo abre con un usuario
+ * ya guardado) — dar de alta uno nuevo pasa por NuevoUsuarioActivity,
+ * una pantalla aparte. Por eso aquí no hay campo de contraseña: un
+ * administrador no puede cambiarle la contraseña a otra cuenta desde
+ * esta pantalla.
+ */
 class UsuarioDialogFragment(
     private val usuario: Usuario? = null,
     private val onGuardar: (
         usuarioExistente: Usuario?,
         nombre: String,
         correo: String,
-        password: String,
         rol: String,
         activo: Boolean
     ) -> Unit,
@@ -45,16 +50,6 @@ class UsuarioDialogFragment(
         val etCorreo =
             view.findViewById<TextInputEditText>(
                 R.id.etCorreoUsuarioDialog
-            )
-
-        val etPassword =
-            view.findViewById<TextInputEditText>(
-                R.id.etPasswordUsuarioDialog
-            )
-
-        val layoutPassword =
-            view.findViewById<TextInputLayout>(
-                R.id.layoutPasswordUsuario
             )
 
         val rbAdministrador =
@@ -98,9 +93,6 @@ class UsuarioDialogFragment(
             etNombre.setText(usuario.nombre)
             etCorreo.setText(usuario.correo)
 
-            layoutPassword.hint =
-                "Nueva contraseña (opcional)"
-
             rbAdministrador.isChecked = usuario.rol == 0
 
             rbOperador.isChecked =
@@ -119,9 +111,6 @@ class UsuarioDialogFragment(
 
             val correo =
                 etCorreo.text?.toString()?.trim().orEmpty()
-
-            val password =
-                etPassword.text?.toString().orEmpty()
 
             val rol =
                 if (rbAdministrador.isChecked) {
@@ -145,21 +134,10 @@ class UsuarioDialogFragment(
                 return@setOnClickListener
             }
 
-            if (
-                usuario == null &&
-                password.length < 6
-            ) {
-                etPassword.error =
-                    "La contraseña debe tener mínimo 6 caracteres"
-
-                return@setOnClickListener
-            }
-
             onGuardar(
                 usuario,
                 nombre,
                 correo,
-                password,
                 rol,
                 switchActivo.isChecked
             )
