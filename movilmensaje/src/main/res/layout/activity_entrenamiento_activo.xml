@@ -149,6 +149,20 @@
                 app:backgroundTint="#2F7BFF"
                 app:cornerRadius="20dp"/>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOmitirDescanso"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:text="Omitir descanso"
+                android:textAllCaps="false"
+                android:textColor="#8AB4FF"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:backgroundTint="#00000000"
+                app:elevation="0dp"
+                app:rippleColor="#228AB4FF"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -2,6 +2,7 @@ package com.example.proyecto.wear.presentation.communication
 
 import android.util.Log
 import com.example.proyecto.wear.presentation.data.model.Entrenamiento
+import com.example.proyecto.wear.presentation.data.model.RutinasRemotasParser
 import com.example.proyecto.wear.presentation.data.model.WorkoutState
 import com.example.proyecto.wear.presentation.service.HeartRateSimulator
 import com.example.proyecto.wear.presentation.service.RestTimer
@@ -30,6 +31,10 @@ object WorkoutMessageHandler {
             }
 
             WearConstants.PATH_WORKOUT_READY -> {
+                // El teléfono es quien maneja este entrenamiento; se
+                // limpia cualquier rutina remota que hubiera quedado
+                // seleccionada desde el propio reloj.
+                WorkoutState.limpiarListaEjerciciosStandalone()
                 val workout = parseWorkout(message)
                 WorkoutState.prepareWorkout(workout)
             }
@@ -46,6 +51,7 @@ object WorkoutMessageHandler {
             }
 
             WearConstants.PATH_RESUME_WORKOUT -> {
+                RestTimer.stop()
                 WorkoutTimer.resume()
                 WorkoutState.resumeWorkout()
             }
@@ -59,11 +65,13 @@ object WorkoutMessageHandler {
 
             WearConstants.PATH_NEXT_EXERCISE -> {
                 val updatedWorkout = parseWorkout(message)
+                WorkoutState.registrarSerieCompletada()
                 WorkoutState.updateWorkout(updatedWorkout)
                 WorkoutState.startWorkout()
             }
 
             WearConstants.PATH_UPDATE_WORKOUT -> {
+                WorkoutState.registrarSerieCompletada()
                 WorkoutState.updateWorkout(parseWorkout(message))
             }
 
@@ -72,6 +80,11 @@ object WorkoutMessageHandler {
                 RestTimer.stop()
                 HeartRateSimulator.stop()
                 WorkoutState.finishWorkout()
+            }
+
+            WearConstants.PATH_ROUTINES_LIST -> {
+                val rutinas = RutinasRemotasParser.parsear(message)
+                WorkoutState.actualizarRutinasRemotas(rutinas)
             }
 
             else -> {

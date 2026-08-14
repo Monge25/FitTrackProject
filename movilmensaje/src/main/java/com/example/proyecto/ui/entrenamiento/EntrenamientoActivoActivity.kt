@@ -13,13 +13,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import java.util.Locale
 import kotlin.random.Random
-import com.example.proyecto.data.mock.RutinasCatalog
+import com.example.proyecto.data.model.EjercicioApi
 import com.example.proyecto.data.model.EjercicioProgramado
 import com.example.proyecto.data.model.SesionEntrenamiento
 import com.example.proyecto.data.repository.ProgresoRepository
+import com.example.proyecto.data.repository.RutinasRepository
 import com.example.proyecto.data.wear.EntrenamientoBridge
 import com.example.proyecto.data.wear.WatchConstants
 import com.example.proyecto.data.wear.WatchMessageSender
+import com.example.proyecto.utils.TokenManager
+import androidx.lifecycle.lifecycleScope
+import android.widget.Toast
+import kotlinx.coroutines.launch
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
@@ -46,6 +51,7 @@ class EntrenamientoActivoActivity :
     private lateinit var tvEstadoWatch: TextView
 
     private lateinit var btnCompletarSerie: MaterialButton
+    private lateinit var btnOmitirDescanso: MaterialButton
     private lateinit var btnPausar: MaterialButton
     private lateinit var btnFinalizar: MaterialButton
 
@@ -88,10 +94,6 @@ class EntrenamientoActivoActivity :
 
         inicializarComponentes()
 
-        cargarRutina()
-
-        mostrarEjercicioActual()
-
         configurarEventos()
 
         fechaInicioEntrenamiento = System.currentTimeMillis()
@@ -100,29 +102,10 @@ class EntrenamientoActivoActivity :
 
         iniciarFrecuenciaCardiaca()
 
-        val lanzadoDesdeReloj =
-            intent.getBooleanExtra(
-                EXTRA_LANZADO_DESDE_RELOJ,
-                false
-            )
-
-        if (lanzadoDesdeReloj) {
-            // El reloj ya inició el entrenamiento por su cuenta y fue
-            // quien abrió esta pantalla; no hace falta decirle de
-            // nuevo que está "listo" ni que "inicie".
-            tvEstadoWatch.text = "CONECTADO"
-            vPuntoWatch.setBackgroundResource(R.drawable.fondo_punto_online)
-        } else {
-            // Enlace con el reloj: le avisamos que hay un
-            // entrenamiento listo y arrancamos de inmediato (esta
-            // pantalla no tiene un paso separado de "confirmar
-            // inicio").
-            enviarAlReloj(WatchConstants.PATH_WORKOUT_READY) {
-                enviarAlReloj(WatchConstants.PATH_START_WORKOUT)
-            }
-
-            verificarConexionReloj()
-        }
+        // La rutina se carga de forma asíncrona (viene de la API);
+        // en cuanto llega, cargarRutina() se encarga de mostrar el
+        // primer ejercicio y avisarle al reloj.
+        cargarRutina()
     }
 
     override fun onResume() {
@@ -178,6 +161,13 @@ class EntrenamientoActivoActivity :
     private var fechaInicioEntrenamiento: Long = 0L
 
     private var seriesCompletadasTotal: Int = 0
+
+    // Se pone en true justo al empezar un descanso y en false al
+    // terminarlo — el cronómetro general se detiene mientras tanto,
+    // igual que ya hace el reloj (WorkoutTimer.pause() antes del
+    // descanso). Antes el cronómetro nunca se detenía durante el
+    // descanso, aunque sí lo hacía al pausar manualmente.
+    private var enDescanso = false
 
 
     private fun inicializarComponentes() {
@@ -252,6 +242,11 @@ class EntrenamientoActivoActivity :
                 R.id.btnCompletarSerie
             )
 
+        btnOmitirDescanso =
+            findViewById(
+                R.id.btnOmitirDescanso
+            )
+
         btnPausar =
             findViewById(
                 R.id.btnPausarEntrenamiento
@@ -261,6 +256,11 @@ class EntrenamientoActivoActivity :
             findViewById(
                 R.id.btnFinalizarEntrenamiento
             )
+
+        // Se habilita en continuarTrasCargarRutina(), una vez que
+        // `ejercicios` ya tiene datos reales (evita un click antes
+        // de que responda la API).
+        btnCompletarSerie.isEnabled = false
     }
 
 
@@ -282,25 +282,127 @@ class EntrenamientoActivoActivity :
         tvNombreRutina.text =
             nombreRutina.uppercase()
 
-        val ejerciciosDeLaRutina =
-            RutinasCatalog.buscarPorId(rutinaId)
-                ?.ejerciciosPredeterminados
-
-        ejercicios =
-            if (ejerciciosDeLaRutina.isNullOrEmpty()) {
-                // Respaldo: rutina sin ejercicios predeterminados
-                // (ej. "Cardio") o id no encontrado.
-                listOf(
-                    EjercicioProgramado(
-                        nombre = nombreRutina,
-                        series = 1,
-                        repeticiones = 0,
-                        descansoSegundos = 30
-                    )
+        if (rutinaId == 0) {
+            // No hay id real (llegada rara, o entrenamiento libre):
+            // respaldo genérico para no dejar la pantalla sin nada.
+            ejercicios = listOf(
+                EjercicioProgramado(
+                    nombre = nombreRutina,
+                    series = 1,
+                    repeticiones = 0,
+                    descansoSegundos = 30
                 )
-            } else {
-                ejerciciosDeLaRutina
+            )
+
+            continuarTrasCargarRutina()
+            return
+        }
+
+        lifecycleScope.launch {
+
+            val token =
+                TokenManager(this@EntrenamientoActivoActivity)
+                    .obtenerBearer()
+
+            RutinasRepository()
+                .obtenerPorId(token, rutinaId)
+                .fold(
+                    onSuccess = { rutina ->
+                        ejercicios =
+                            mapearEjerciciosDeLaApi(rutina.ejercicios, nombreRutina)
+
+                        continuarTrasCargarRutina()
+                    },
+                    onFailure = {
+                        Toast.makeText(
+                            this@EntrenamientoActivoActivity,
+                            "No se pudo cargar la rutina, se usará un plan básico",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        ejercicios = listOf(
+                            EjercicioProgramado(
+                                nombre = nombreRutina,
+                                series = 1,
+                                repeticiones = 0,
+                                descansoSegundos = 30
+                            )
+                        )
+
+                        continuarTrasCargarRutina()
+                    }
+                )
+        }
+    }
+
+    private fun mapearEjerciciosDeLaApi(
+        ejerciciosApi: List<EjercicioApi>,
+        nombreRutina: String
+    ): List<EjercicioProgramado> {
+
+        if (ejerciciosApi.isEmpty()) {
+            // Rutina sin ejercicios cargados todavía: respaldo
+            // genérico para no dejar la pantalla sin nada.
+            return listOf(
+                EjercicioProgramado(
+                    nombre = nombreRutina,
+                    series = 1,
+                    repeticiones = 0,
+                    descansoSegundos = 30
+                )
+            )
+        }
+
+        return ejerciciosApi.map { ejercicio ->
+            EjercicioProgramado(
+                id = ejercicio.id.toLong(),
+                nombre = ejercicio.nombre,
+                series = ejercicio.series,
+                repeticiones = ejercicio.repeticiones,
+                pesoKg = ejercicio.peso?.toFloat() ?: 0f,
+                descansoSegundos = ejercicio.descanso,
+                notas = ejercicio.notas ?: ""
+            )
+        }
+    }
+
+    /**
+     * Se llama una vez que `ejercicios` ya tiene datos reales
+     * (vinieron de la API o del respaldo genérico): pinta el primer
+     * ejercicio y, si el teléfono fue quien inició, le avisa al
+     * reloj — antes esto corría en onCreate() de forma síncrona,
+     * asumiendo que la rutina ya estaba disponible al instante
+     * (cuando venía del catálogo local simulado).
+     */
+    private fun continuarTrasCargarRutina() {
+
+        mostrarEjercicioActual()
+
+        btnCompletarSerie.isEnabled = true
+
+        val lanzadoDesdeReloj =
+            intent.getBooleanExtra(
+                EXTRA_LANZADO_DESDE_RELOJ,
+                false
+            )
+
+        if (lanzadoDesdeReloj) {
+            // El reloj ya inició el entrenamiento por su cuenta y fue
+            // quien abrió esta pantalla; no hace falta decirle de
+            // nuevo que está "listo" ni que "inicie".
+            tvEstadoWatch.text = "CONECTADO"
+            vPuntoWatch.setBackgroundResource(R.drawable.fondo_punto_online)
+        } else {
+            // Enlace con el reloj: le avisamos que hay un
+            // entrenamiento listo y arrancamos de inmediato (esta
+            // pantalla no tiene un paso separado de "confirmar
+            // inicio").
+            enviarAlReloj(WatchConstants.PATH_WORKOUT_READY) {
+                enviarAlReloj(WatchConstants.PATH_START_WORKOUT)
             }
+
+            verificarConexionReloj()
+        }
     }
 
 
@@ -309,6 +411,11 @@ class EntrenamientoActivoActivity :
         btnCompletarSerie.setOnClickListener {
 
             completarSerie()
+        }
+
+        btnOmitirDescanso.setOnClickListener {
+
+            omitirDescanso()
         }
 
         btnPausar.setOnClickListener {
@@ -392,6 +499,10 @@ class EntrenamientoActivoActivity :
 
         btnCompletarSerie.isEnabled = false
 
+        enDescanso = true
+
+        btnOmitirDescanso.visibility = View.VISIBLE
+
         temporizadorDescanso?.cancel()
 
         temporizadorDescanso =
@@ -418,6 +529,10 @@ class EntrenamientoActivoActivity :
 
                 override fun onFinish() {
 
+                    enDescanso = false
+
+                    btnOmitirDescanso.visibility = View.GONE
+
                     avanzarSerie()
 
                     btnCompletarSerie.isEnabled =
@@ -425,6 +540,28 @@ class EntrenamientoActivoActivity :
                 }
 
             }.start()
+    }
+
+
+    private fun omitirDescanso() {
+
+        temporizadorDescanso?.cancel()
+
+        enDescanso = false
+
+        btnOmitirDescanso.visibility = View.GONE
+
+        btnCompletarSerie.isEnabled = true
+
+        avanzarSerie()
+
+        // El reloj tiene su propio cronómetro de descanso corriendo
+        // por su cuenta con la misma duración; se le avisa que ya
+        // se reanudó para que no se quede contando de más.
+        enviarAlReloj(
+            path = WatchConstants.PATH_RESUME_WORKOUT,
+            mensaje = "RESUME"
+        )
     }
 
 
@@ -485,7 +622,7 @@ class EntrenamientoActivoActivity :
 
                 override fun run() {
 
-                    if (entrenamientoActivo) {
+                    if (entrenamientoActivo && !enDescanso) {
 
                         segundosTranscurridos++
 

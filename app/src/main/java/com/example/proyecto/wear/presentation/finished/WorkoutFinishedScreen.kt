@@ -30,11 +30,17 @@ import com.example.proyecto.wear.presentation.theme.FitTrackSurface
 import com.example.proyecto.wear.presentation.theme.FitTrackTextSecondary
 import com.example.proyecto.wear.presentation.utils.TimeUtils
 
+/**
+ * Mismos 5 datos que ya muestra la pantalla de resumen del teléfono
+ * (ResumenEntrenamientoActivity): tiempo, ejercicios, series,
+ * calorías y frecuencia promedio.
+ */
 @Composable
 fun WorkoutFinishedScreen(
     workoutName: String,
     elapsedSeconds: Long,
     exercises: Int,
+    series: Int,
     heartRate: Int,
     calories: Int,
     onAccept: () -> Unit
@@ -44,18 +50,18 @@ fun WorkoutFinishedScreen(
         AccentRing(
             progress = 1f,
             color = FitTrackGreen,
-            size = 74.dp,
+            size = 68.dp,
             strokeWidth = 5.dp
         ) {
             Text(
                 text = "✓",
-                fontSize = 24.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = FitTrackGreen
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         SectionLabel(text = "Completado", color = FitTrackGreen)
 
@@ -64,37 +70,52 @@ fun WorkoutFinishedScreen(
         Text(
             text = workoutName,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
+            fontSize = 15.sp,
             color = Color.White
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Tarjeta de estadísticas, igual al "Resumen de la sesión"
-        // del teléfono: tres datos en fila.
-        Row(
+        // Cuadrícula 2x2 con los mismos 4 datos que el teléfono
+        // muestra en sus tarjetas ("Resumen de la sesión").
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(FitTrackSurface)
-                .padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .padding(vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            EstadisticaFinal(
-                valor = TimeUtils.formatSeconds(elapsedSeconds),
-                etiqueta = "TIEMPO"
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                EstadisticaFinal(
+                    valor = TimeUtils.formatSeconds(elapsedSeconds),
+                    etiqueta = "TIEMPO"
+                )
 
-            EstadisticaFinal(
-                valor = exercises.toString(),
-                etiqueta = "EJERCICIOS"
-            )
+                EstadisticaFinal(
+                    valor = exercises.toString(),
+                    etiqueta = "EJERCICIOS"
+                )
+            }
 
-            EstadisticaFinal(
-                valor = "$calories",
-                etiqueta = "KCAL"
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                EstadisticaFinal(
+                    valor = series.toString(),
+                    etiqueta = "SERIES"
+                )
+
+                EstadisticaFinal(
+                    valor = "$calories",
+                    etiqueta = "KCAL"
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

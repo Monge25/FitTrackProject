@@ -15,4 +15,6 @@ object WatchConstants {
     const val PATH_NEXT_EXERCISE = "/fittrack/workout/next"
     const val PATH_FINISH_WORKOUT = "/fittrack/workout/finish"
     const val PATH_UPDATE_WORKOUT = "/fittrack/workout/update"
+    const val PATH_REQUEST_ROUTINES = "/fittrack/routines/request"
+    const val PATH_ROUTINES_LIST = "/fittrack/routines/list"
 }

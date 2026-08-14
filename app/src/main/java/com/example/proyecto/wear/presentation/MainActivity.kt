@@ -9,13 +9,13 @@ import androidx.compose.runtime.Composable
 import com.example.proyecto.wear.presentation.communication.PhoneMessageSender
 import com.example.proyecto.wear.presentation.communication.WearConstants
 import com.example.proyecto.wear.presentation.communication.WorkoutMessageHandler
+import com.example.proyecto.wear.presentation.data.model.EjercicioRemoto
 import com.example.proyecto.wear.presentation.data.model.WorkoutScreen
 import com.example.proyecto.wear.presentation.data.model.WorkoutState
 import com.example.proyecto.wear.presentation.finished.WorkoutFinishedScreen
 import com.example.proyecto.wear.presentation.history.HistorialDetalleScreen
 import com.example.proyecto.wear.presentation.history.WorkoutHistoryScreen
 import com.example.proyecto.wear.presentation.home.HomeScreen
-import com.example.proyecto.wear.presentation.data.model.RoutineCatalog
 import com.example.proyecto.wear.presentation.data.model.HistorialEntrenamiento
 import com.example.proyecto.wear.presentation.data.model.WorkoutHistoryStore
 import com.example.proyecto.wear.presentation.paused.PausedWorkoutScreen
@@ -114,16 +114,17 @@ class MainActivity :
                         WorkoutState.showHistory()
                     },
                     onSeeRoutines = {
-                        WorkoutState.showRoutineList()
+                        pedirRutinasAlTelefono()
                     }
                 )
             }
 
             WorkoutScreen.ROUTINE_LIST -> {
                 RoutineListScreen(
-                    routines = RoutineCatalog.routines,
-                    onSelectRoutine = { entrenamiento ->
-                        WorkoutState.selectRoutine(entrenamiento)
+                    routines = WorkoutState.rutinasRemotas,
+                    cargando = WorkoutState.cargandoRutinas,
+                    onSelectRoutine = { rutina ->
+                        WorkoutState.seleccionarRutinaRemota(rutina)
                     },
                     onBack = {
                         WorkoutState.showHome()
@@ -188,6 +189,7 @@ class MainActivity :
                     workoutName = WorkoutState.workout.nombreRutina,
                     elapsedSeconds = WorkoutState.elapsedSeconds,
                     exercises = WorkoutState.workout.totalEjercicios,
+                    series = WorkoutState.seriesCompletadas,
                     heartRate = WorkoutState.heartRate,
                     calories = WorkoutState.calories,
                     onAccept = {
@@ -228,6 +230,22 @@ class MainActivity :
         }
     }
 
+    /**
+     * Pide al teléfono la lista real de rutinas activas (con sus
+     * ejercicios completos) antes de mostrar la pantalla — el reloj
+     * ya no tiene su propio catálogo local, ni siquiera uno "real"
+     * duplicado: siempre pregunta en el momento.
+     */
+    private fun pedirRutinasAlTelefono() {
+        WorkoutState.mostrarCargandoRutinas()
+        WorkoutState.showRoutineList()
+
+        enviarMensajeAlTelefono(
+            path = WearConstants.PATH_REQUEST_ROUTINES,
+            message = ""
+        )
+    }
+
     private fun iniciarEntrenamiento() {
         WorkoutState.startWorkout()
         WorkoutTimer.start()
@@ -243,12 +261,81 @@ class MainActivity :
     }
 
     private fun completarSerie() {
+
+        WorkoutState.registrarSerieCompletada()
+
+        val listaReal = WorkoutState.ejerciciosRutinaActual
+
+        if (listaReal.isNotEmpty()) {
+            completarSerieConDatosReales(listaReal)
+        } else {
+            completarSerieSinDatosReales()
+        }
+    }
+
+    /**
+     * La rutina la eligió el propio reloj (WorkoutState.ejerciciosRutinaActual
+     * viene de la API real, vía el teléfono): se usan los ejercicios,
+     * series y — sobre todo — el descanso REAL de cada uno, en vez de
+     * un valor fijo.
+     */
+    private fun completarSerieConDatosReales(lista: List<EjercicioRemoto>) {
+
+        val indice = WorkoutState.indiceEjercicioActual
+        val ejercicio = lista[indice]
+        val actual = WorkoutState.workout
+
+        if (actual.serieActual < ejercicio.series) {
+
+            // Queda otra serie del mismo ejercicio.
+            WorkoutState.updateWorkout(
+                actual.copy(serieActual = actual.serieActual + 1)
+            )
+
+            WorkoutTimer.pause()
+            WorkoutState.startRest(ejercicio.descansoSegundos)
+            RestTimer.start(ejercicio.descansoSegundos)
+
+        } else if (indice < lista.lastIndex) {
+
+            // Se acabaron las series: pasa al siguiente ejercicio real.
+            val siguienteIndice = indice + 1
+            val siguiente = lista[siguienteIndice]
+            val despuesDelSiguiente = lista.getOrNull(siguienteIndice + 1)
+
+            WorkoutState.avanzarIndiceEjercicio(siguienteIndice)
+
+            WorkoutState.updateWorkout(
+                actual.copy(
+                    ejercicioActual = siguiente.nombre,
+                    siguienteEjercicio = despuesDelSiguiente?.nombre ?: ULTIMO_EJERCICIO_MARCADOR,
+                    serieActual = 1,
+                    totalSeries = siguiente.series,
+                    repeticiones = siguiente.repeticiones
+                )
+            )
+
+            WorkoutTimer.pause()
+            WorkoutState.startRest(ejercicio.descansoSegundos)
+            RestTimer.start(ejercicio.descansoSegundos)
+
+        } else {
+
+            // Ya no hay más ejercicios: se termina solo.
+            finalizarEntrenamiento()
+        }
+    }
+
+    /**
+     * El entrenamiento lo maneja el teléfono: el reloj solo conoce
+     * "ejercicio actual" y "siguiente" (no una lista completa), así
+     * que aquí se mantiene el comportamiento anterior.
+     */
+    private fun completarSerieSinDatosReales() {
         val actual = WorkoutState.workout
 
         if (actual.serieActual < actual.totalSeries) {
 
-            // Queda otra serie del mismo ejercicio: solo avanza el
-            // contador y manda a descansar.
             WorkoutState.updateWorkout(
                 actual.copy(serieActual = actual.serieActual + 1)
             )
@@ -261,11 +348,6 @@ class MainActivity :
             actual.siguienteEjercicio != actual.ejercicioActual
         ) {
 
-            // Se acabaron las series de este ejercicio: pasa al
-            // siguiente. Ojo: el reloj en modo standalone solo
-            // conoce el nombre del "siguiente" ejercicio (no una
-            // lista completa como el catálogo del teléfono), así
-            // que después de este ya no hay más para mostrar.
             WorkoutState.updateWorkout(
                 actual.copy(
                     ejercicioActual = actual.siguienteEjercicio,
@@ -280,7 +362,6 @@ class MainActivity :
 
         } else {
 
-            // Ya no hay más ejercicios conocidos: se termina solo.
             finalizarEntrenamiento()
         }
     }

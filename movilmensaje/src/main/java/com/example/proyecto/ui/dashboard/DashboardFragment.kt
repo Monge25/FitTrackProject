@@ -9,11 +9,11 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.proyecto.Principal
-import com.example.proyecto.data.mock.RutinasCatalog
-import com.example.proyecto.data.mock.UsuariosCatalog
+import com.example.proyecto.data.repository.AuthRepository
 import com.example.proyecto.data.repository.CalendarioRepository
 import com.example.proyecto.data.repository.ClientesRepository
 import com.example.proyecto.data.repository.ProgresoRepository
+import com.example.proyecto.data.repository.RutinasRepository
 import com.example.proyecto.utils.Permisos
 import com.example.proyecto.utils.TokenManager
 import com.google.android.material.card.MaterialCardView
@@ -234,12 +234,15 @@ class DashboardFragment : Fragment() {
 
     private fun configurarEstadisticas() {
 
-        // RUTINAS Y CUENTAS: catálogos compartidos, disponibles al instante
+        // RUTINAS: viene del backend, así que se pide aparte (asíncrono)
 
-        tvTotalRutinas.text =
-            RutinasCatalog.rutinas.size.toString()
+        tvTotalRutinas.text = "…"
+
+        cargarTotalRutinas()
 
         tvTotalEntrenadores.text = "…"
+
+        cargarTotalEntrenadores()
 
         // CALENDARIO: entrenamientos programados que faltan por completar
 
@@ -269,6 +272,58 @@ class DashboardFragment : Fragment() {
         tvTotalClientes.text = "…"
 
         cargarTotalClientes()
+    }
+
+
+    private fun cargarTotalEntrenadores() {
+
+        val tokenManager = TokenManager(requireContext())
+        val authRepository = AuthRepository()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            val bearer = tokenManager.obtenerBearer()
+
+            if (bearer.isBlank()) {
+                tvTotalEntrenadores.text = "0"
+                return@launch
+            }
+
+            authRepository.obtenerUsuarios(bearer)
+                .onSuccess { usuarios ->
+                    tvTotalEntrenadores.text =
+                        usuarios.count { it.esActivo }.toString()
+                }
+                .onFailure {
+                    tvTotalEntrenadores.text = "--"
+                }
+        }
+    }
+
+
+    private fun cargarTotalRutinas() {
+
+        val tokenManager = TokenManager(requireContext())
+        val rutinasRepository = RutinasRepository()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            val bearer = tokenManager.obtenerBearer()
+
+            if (bearer.isBlank()) {
+                tvTotalRutinas.text = "0"
+                return@launch
+            }
+
+            rutinasRepository.obtenerTodas(bearer)
+                .onSuccess { rutinas ->
+                    tvTotalRutinas.text =
+                        rutinas.count { it.esActivo }.toString()
+                }
+                .onFailure {
+                    tvTotalRutinas.text = "--"
+                }
+        }
     }
 
 
