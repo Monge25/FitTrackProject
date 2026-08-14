@@ -12,51 +12,13 @@
     app:strokeColor="#263242"
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tvEjercicioDetalleTexto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="18dp">
-
-        <TextView
-            android:id="@+id/tvNumeroDetalleEjercicio"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/fondo_icono_azul"
-            android:gravity="center"
-            android:text="01"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:textStyle="bold"/>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvNombreDetalleEjercicio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Press de banca"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/tvResumenDetalleEjercicio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="4 series • 10 repeticiones • 60 s de descanso"
-                android:textColor="#8D99A8"
-                android:textSize="12sp"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
+        android:padding="22dp"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold"/>
 
 </com.google.android.material.card.MaterialCardView>

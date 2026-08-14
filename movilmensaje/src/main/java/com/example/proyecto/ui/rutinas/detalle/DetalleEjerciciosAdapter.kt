@@ -2,6 +2,7 @@ package com.example.proyecto.ui.rutinas.detalle
 import com.example.movilmensaje.R
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -11,18 +12,15 @@ class DetalleEjerciciosAdapter(
     private val ejercicios: List<EjercicioApi>
 ) : RecyclerView.Adapter<DetalleEjerciciosAdapter.EjercicioViewHolder>() {
 
-    inner class EjercicioViewHolder(itemView: android.view.View) :
-        RecyclerView.ViewHolder(itemView) {
-
-        private val tvNumero: TextView = itemView.findViewById(R.id.tvNumeroDetalleEjercicio)
-        private val tvNombre: TextView = itemView.findViewById(R.id.tvNombreDetalleEjercicio)
-        private val tvResumen: TextView = itemView.findViewById(R.id.tvResumenDetalleEjercicio)
+    inner class EjercicioViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvTexto: TextView = itemView.findViewById(R.id.tvEjercicioDetalleTexto)
 
         fun bind(ejercicio: EjercicioApi, posicion: Int) {
-            tvNumero.text = String.format("%02d", posicion + 1)
-            tvNombre.text = ejercicio.nombre
-            tvResumen.text =
-                "${ejercicio.series} series • ${ejercicio.repeticiones} repeticiones • " +
+            val num = String.format("%02d", posicion + 1)
+            tvTexto.text =
+                "$num   ${ejercicio.nombre}\n" +
+                        "       ${ejercicio.series} series • " +
+                        "${ejercicio.repeticiones} repeticiones • " +
                         "${ejercicio.descanso} s de descanso"
         }
     }

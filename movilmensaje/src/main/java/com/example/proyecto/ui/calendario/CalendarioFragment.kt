@@ -226,7 +226,7 @@ class CalendarioFragment : Fragment() {
         intent.putExtra("RUTINA_NIVEL", entrenamiento.nivel)
         intent.putExtra("RUTINA_DURACION", entrenamiento.duracionMinutos)
         intent.putExtra("RUTINA_EJERCICIOS", entrenamiento.cantidadEjercicios)
-        intent.putExtra("ENTRENAMIENTO_PROGRAMADO_ID", entrenamiento.id)
+        intent.putExtra("ENTRENAMIENTO_PROGRAMADO_ID", entrenamiento.id.toInt())
         intent.putExtra("ENTRENAMIENTO_FECHA", entrenamiento.fecha)
         intent.putExtra("ENTRENAMIENTO_HORA", entrenamiento.hora)
         intent.putExtra("VIENE_DE_CALENDARIO", true)

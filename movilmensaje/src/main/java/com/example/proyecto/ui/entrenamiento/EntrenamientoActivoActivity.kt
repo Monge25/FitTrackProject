@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import java.util.Locale
 import kotlin.random.Random
-import com.example.proyecto.data.model.EjercicioApi
+import com.example.proyecto.data.mock.RutinasCatalog
 import com.example.proyecto.data.model.EjercicioProgramado
 import com.example.proyecto.data.model.SesionEntrenamiento
 import com.example.proyecto.data.repository.ProgresoRepository
@@ -33,6 +33,9 @@ class EntrenamientoActivoActivity :
     AppCompatActivity(),
     EntrenamientoBridge.Listener,
     MessageClient.OnMessageReceivedListener {
+
+    private var sesionId: Int = -1
+    private var ejerciciosCompletadosIds: List<Int> = emptyList()
 
     private lateinit var tvNombreRutina: TextView
     private lateinit var tvEjercicioActual: TextView
@@ -94,6 +97,8 @@ class EntrenamientoActivoActivity :
 
         inicializarComponentes()
 
+        cargarRutina()
+
         configurarEventos()
 
         fechaInicioEntrenamiento = System.currentTimeMillis()
@@ -102,10 +107,29 @@ class EntrenamientoActivoActivity :
 
         iniciarFrecuenciaCardiaca()
 
-        // La rutina se carga de forma asíncrona (viene de la API);
-        // en cuanto llega, cargarRutina() se encarga de mostrar el
-        // primer ejercicio y avisarle al reloj.
-        cargarRutina()
+        val lanzadoDesdeReloj =
+            intent.getBooleanExtra(
+                EXTRA_LANZADO_DESDE_RELOJ,
+                false
+            )
+
+        if (lanzadoDesdeReloj) {
+            // El reloj ya inició el entrenamiento por su cuenta y fue
+            // quien abrió esta pantalla; no hace falta decirle de
+            // nuevo que está "listo" ni que "inicie".
+            tvEstadoWatch.text = "CONECTADO"
+            vPuntoWatch.setBackgroundResource(R.drawable.fondo_punto_online)
+        } else {
+            // Enlace con el reloj: le avisamos que hay un
+            // entrenamiento listo y arrancamos de inmediato (esta
+            // pantalla no tiene un paso separado de "confirmar
+            // inicio").
+            enviarAlReloj(path = WatchConstants.PATH_WORKOUT_READY, mensaje = nombreRutinaActual) {
+                enviarAlReloj(path = WatchConstants.PATH_START_WORKOUT, mensaje = nombreRutinaActual)
+            }
+
+            verificarConexionReloj()
+        }
     }
 
     override fun onResume() {
@@ -265,143 +289,86 @@ class EntrenamientoActivoActivity :
 
 
     private fun cargarRutina() {
+        val rutinaId     = intent.getIntExtra("RUTINA_ID", -1)
+        val nombreRutina = intent.getStringExtra("RUTINA_NOMBRE") ?: "Entrenamiento"
 
-        val rutinaId =
-            intent.getIntExtra(
-                "RUTINA_ID",
-                0
-            )
+        nombreRutinaActual  = nombreRutina
+        tvNombreRutina.text = nombreRutina.uppercase()
 
-        val nombreRutina =
-            intent.getStringExtra(
-                "RUTINA_NOMBRE"
-            ) ?: "Entrenamiento"
-
-        nombreRutinaActual = nombreRutina
-
-        tvNombreRutina.text =
-            nombreRutina.uppercase()
-
-        if (rutinaId == 0) {
-            // No hay id real (llegada rara, o entrenamiento libre):
-            // respaldo genérico para no dejar la pantalla sin nada.
+        if (rutinaId == -1) {
             ejercicios = listOf(
                 EjercicioProgramado(
-                    nombre = nombreRutina,
-                    series = 1,
-                    repeticiones = 0,
+                    nombre           = nombreRutina,
+                    series           = 1,
+                    repeticiones     = 0,
                     descansoSegundos = 30
                 )
             )
-
-            continuarTrasCargarRutina()
+            mostrarEjercicioActual()
+            btnCompletarSerie.isEnabled = true
             return
         }
 
         lifecycleScope.launch {
+            val token = TokenManager(this@EntrenamientoActivoActivity).obtenerBearer()
 
-            val token =
-                TokenManager(this@EntrenamientoActivoActivity)
-                    .obtenerBearer()
-
-            RutinasRepository()
-                .obtenerPorId(token, rutinaId)
-                .fold(
-                    onSuccess = { rutina ->
-                        ejercicios =
-                            mapearEjerciciosDeLaApi(rutina.ejercicios, nombreRutina)
-
-                        continuarTrasCargarRutina()
-                    },
-                    onFailure = {
-                        Toast.makeText(
-                            this@EntrenamientoActivoActivity,
-                            "No se pudo cargar la rutina, se usará un plan básico",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        ejercicios = listOf(
+            RutinasRepository().obtenerPorId(token, rutinaId).fold(
+                onSuccess = { rutina ->
+                    ejercicios = if (rutina.ejercicios.isEmpty()) {
+                        listOf(
                             EjercicioProgramado(
-                                nombre = nombreRutina,
-                                series = 1,
-                                repeticiones = 0,
+                                nombre           = nombreRutina,
+                                series           = 1,
+                                repeticiones     = 0,
                                 descansoSegundos = 30
                             )
                         )
-
-                        continuarTrasCargarRutina()
+                    } else {
+                        rutina.ejercicios.map { ej ->
+                            EjercicioProgramado(
+                                id               = ej.id.toLong(),
+                                nombre           = ej.nombre,
+                                series           = ej.series,
+                                repeticiones     = ej.repeticiones,
+                                pesoKg           = ej.peso?.toFloat() ?: 0f,
+                                descansoSegundos = ej.descanso,
+                                notas            = ej.notas ?: ""
+                            )
+                        }
                     }
-                )
-        }
-    }
 
-    private fun mapearEjerciciosDeLaApi(
-        ejerciciosApi: List<EjercicioApi>,
-        nombreRutina: String
-    ): List<EjercicioProgramado> {
+                    mostrarEjercicioActual()
+                    btnCompletarSerie.isEnabled = true
 
-        if (ejerciciosApi.isEmpty()) {
-            // Rutina sin ejercicios cargados todavía: respaldo
-            // genérico para no dejar la pantalla sin nada.
-            return listOf(
-                EjercicioProgramado(
-                    nombre = nombreRutina,
-                    series = 1,
-                    repeticiones = 0,
-                    descansoSegundos = 30
-                )
+                    // Iniciar sesión en la API
+                    val sesionIdExtra = intent.getIntExtra("SESION_ID", -1)
+                    if (sesionIdExtra != -1) {
+                        sesionId = sesionIdExtra
+                        val sesionesRepo = com.example.proyecto.data.repository.SesionesRepository()
+
+                        sesionesRepo.iniciar(token, sesionId)
+
+                        sesionesRepo.obtenerPorId(token, sesionId).fold(
+                            onSuccess = { sesion ->
+                                ejerciciosCompletadosIds = sesion.ejercicios.map { it.id }
+                            },
+                            onFailure = { }
+                        )
+                    }
+                },
+                onFailure = {
+                    ejercicios = listOf(
+                        EjercicioProgramado(
+                            nombre           = nombreRutina,
+                            series           = 1,
+                            repeticiones     = 0,
+                            descansoSegundos = 30
+                        )
+                    )
+                    mostrarEjercicioActual()
+                    btnCompletarSerie.isEnabled = true
+                }
             )
-        }
-
-        return ejerciciosApi.map { ejercicio ->
-            EjercicioProgramado(
-                id = ejercicio.id.toLong(),
-                nombre = ejercicio.nombre,
-                series = ejercicio.series,
-                repeticiones = ejercicio.repeticiones,
-                pesoKg = ejercicio.peso?.toFloat() ?: 0f,
-                descansoSegundos = ejercicio.descanso,
-                notas = ejercicio.notas ?: ""
-            )
-        }
-    }
-
-    /**
-     * Se llama una vez que `ejercicios` ya tiene datos reales
-     * (vinieron de la API o del respaldo genérico): pinta el primer
-     * ejercicio y, si el teléfono fue quien inició, le avisa al
-     * reloj — antes esto corría en onCreate() de forma síncrona,
-     * asumiendo que la rutina ya estaba disponible al instante
-     * (cuando venía del catálogo local simulado).
-     */
-    private fun continuarTrasCargarRutina() {
-
-        mostrarEjercicioActual()
-
-        btnCompletarSerie.isEnabled = true
-
-        val lanzadoDesdeReloj =
-            intent.getBooleanExtra(
-                EXTRA_LANZADO_DESDE_RELOJ,
-                false
-            )
-
-        if (lanzadoDesdeReloj) {
-            // El reloj ya inició el entrenamiento por su cuenta y fue
-            // quien abrió esta pantalla; no hace falta decirle de
-            // nuevo que está "listo" ni que "inicie".
-            tvEstadoWatch.text = "CONECTADO"
-            vPuntoWatch.setBackgroundResource(R.drawable.fondo_punto_online)
-        } else {
-            // Enlace con el reloj: le avisamos que hay un
-            // entrenamiento listo y arrancamos de inmediato (esta
-            // pantalla no tiene un paso separado de "confirmar
-            // inicio").
-            enviarAlReloj(WatchConstants.PATH_WORKOUT_READY) {
-                enviarAlReloj(WatchConstants.PATH_START_WORKOUT)
-            }
-
-            verificarConexionReloj()
         }
     }
 
@@ -472,24 +439,45 @@ class EntrenamientoActivoActivity :
 
 
     private fun completarSerie() {
-
         seriesCompletadasTotal++
 
-        val ejercicio =
-            ejercicios[indiceEjercicio]
+        val ejercicio = ejercicios[indiceEjercicio]
 
-        // Se manda la duración real del descanso de este ejercicio
-        // (no el mensaje genérico de estado) para que el reloj
-        // cuente los mismos segundos que el teléfono, en vez de su
-        // valor fijo anterior.
+        // Notificar al reloj
         enviarAlReloj(
-            path = WatchConstants.PATH_REST,
+            path    = WatchConstants.PATH_REST,
             mensaje = ejercicio.descansoSegundos.toString()
         )
 
-        iniciarDescanso(
-            ejercicio.descansoSegundos
-        )
+        // Marcar en la API si es la última serie del ejercicio
+        val esUltimaSerie = serieActual >= ejercicio.series
+        if (esUltimaSerie && sesionId != -1) {
+            val ejCompletadoId = ejerciciosCompletadosIds.getOrNull(indiceEjercicio)
+            if (ejCompletadoId != null) {
+                lifecycleScope.launch {
+                    val token = com.example.proyecto.utils.TokenManager(
+                        this@EntrenamientoActivoActivity
+                    ).obtenerBearer()
+
+                    com.example.proyecto.data.repository.SesionesRepository()
+                        .completarEjercicio(
+                            token          = token,
+                            sesionId       = sesionId,
+                            ejCompletadoId = ejCompletadoId,
+                            request        = com.example.proyecto.data.model.CompletarEjercicioRequest(
+                                seriesCompletadas       = ejercicio.series,
+                                repeticionesCompletadas = ejercicio.repeticiones,
+                                pesoUsado               = if (ejercicio.pesoKg > 0f)
+                                    ejercicio.pesoKg.toDouble()
+                                else null,
+                                notas                   = ejercicio.notas.ifBlank { null }
+                            )
+                        )
+                }
+            }
+        }
+
+        iniciarDescanso(ejercicio.descansoSegundos)
     }
 
 
@@ -730,13 +718,9 @@ class EntrenamientoActivoActivity :
 
 
     private fun finalizarEntrenamiento(avisarAlReloj: Boolean = true) {
-
         entrenamientoActivo = false
-
         temporizadorDescanso?.cancel()
-
         handlerCronometro.removeCallbacksAndMessages(null)
-
         handlerFrecuencia.removeCallbacksAndMessages(null)
 
         if (avisarAlReloj) {
@@ -745,11 +729,30 @@ class EntrenamientoActivoActivity :
 
         val idSesion = guardarSesionEntrenamiento()
 
-        val intent = Intent(this, ResumenEntrenamientoActivity::class.java)
-        intent.putExtra(ResumenEntrenamientoActivity.EXTRA_SESION_ID, idSesion)
-        startActivity(intent)
+        if (sesionId != -1) {
+            lifecycleScope.launch {
+                val token = com.example.proyecto.utils.TokenManager(
+                    this@EntrenamientoActivoActivity
+                ).obtenerBearer()
 
-        finish()
+                com.example.proyecto.data.repository.SesionesRepository()
+                    .finalizar(token, sesionId)
+
+                // Navegar DESPUÉS de que finalice la llamada a la API
+                val intent = Intent(
+                    this@EntrenamientoActivoActivity,
+                    ResumenEntrenamientoActivity::class.java
+                )
+                intent.putExtra(ResumenEntrenamientoActivity.EXTRA_SESION_ID, idSesion)
+                startActivity(intent)
+                finish()
+            }
+        } else {
+            val intent = Intent(this, ResumenEntrenamientoActivity::class.java)
+            intent.putExtra(ResumenEntrenamientoActivity.EXTRA_SESION_ID, idSesion)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun guardarSesionEntrenamiento(): Long {
