@@ -5,6 +5,7 @@ import com.example.proyecto.data.model.ActualizarUsuarioRequest
 import com.example.proyecto.data.model.BuscarClienteResponse
 import com.example.proyecto.data.model.Cliente
 import com.example.proyecto.data.model.ClienteRequest
+import com.example.proyecto.data.model.CompletarEjercicioRequest
 import com.example.proyecto.data.model.CrearEjercicioRequest
 import com.example.proyecto.data.model.CrearRutinaRequest
 import com.example.proyecto.data.model.EjercicioApi
@@ -12,6 +13,8 @@ import com.example.proyecto.data.model.LoginRequest
 import com.example.proyecto.data.model.LoginResponse
 import com.example.proyecto.data.model.RegisterRequest
 import com.example.proyecto.data.model.Rutina
+import com.example.proyecto.data.model.SesionRequest
+import com.example.proyecto.data.model.SesionResponse
 import com.example.proyecto.data.model.Usuario
 import retrofit2.Response
 import retrofit2.http.Body
@@ -132,5 +135,44 @@ interface ClientesApiService {
         @Header("Authorization") token: String,
         @Path("id") id: Int,
         @Body request: ActualizarUsuarioRequest
+    ): Response<Any>
+
+    // ── Sesiones ──────────────────────────────────────────────
+    @POST("api/sesiones")
+    suspend fun programarSesion(
+        @Header("Authorization") token: String,
+        @Body request: SesionRequest
+    ): Response<Any>
+
+    @GET("api/sesiones/usuario/{usuarioId}")
+    suspend fun getSesionesPorUsuario(
+        @Header("Authorization") token: String,
+        @Path("usuarioId") usuarioId: Int
+    ): Response<List<SesionResponse>>
+
+    @GET("api/sesiones/{id}")
+    suspend fun getSesionPorId(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<SesionResponse>
+
+    @PATCH("api/sesiones/{id}/iniciar")
+    suspend fun iniciarSesion(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Any>
+
+    @PATCH("api/sesiones/{id}/ejercicios/{ejCompletadoId}/completar")
+    suspend fun completarEjercicio(
+        @Header("Authorization") token: String,
+        @Path("id") sesionId: Int,
+        @Path("ejCompletadoId") ejCompletadoId: Int,
+        @Body request: CompletarEjercicioRequest
+    ): Response<Any>
+
+    @PATCH("api/sesiones/{id}/finalizar")
+    suspend fun finalizarSesion(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
     ): Response<Any>
 }

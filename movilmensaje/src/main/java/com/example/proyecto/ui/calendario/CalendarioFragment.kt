@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.proyecto.data.model.EntrenamientoProgramado
 import com.example.proyecto.data.repository.CalendarioRepository
 import com.example.proyecto.data.repository.RutinasRepository
+import com.example.proyecto.data.repository.SesionesRepository
 import com.example.proyecto.ui.calendario.programar.ProgramarEntrenamientoActivity
 import com.example.proyecto.ui.rutinas.detalle.DetalleRutinaActivity
 import com.example.proyecto.utils.TokenManager
@@ -128,30 +129,54 @@ class CalendarioFragment : Fragment() {
      * aparece. Después los separa en Próximos / Cumplidos / Vencidos.
      */
     private fun cargarEntrenamientos() {
-
         lifecycleScope.launch {
+            val token     = tokenManager.obtenerBearer()
+            val usuarioId = tokenManager.obtenerUsuarioId()
 
-            val token = tokenManager.obtenerBearer()
-
-            val idsRutinasValidas: Set<Int> =
-                rutinasRepository.obtenerTodas(token).fold(
-                    onSuccess = { rutinas ->
-                        rutinas.filter { it.esActivo }.map { it.id }.toSet()
-                    },
-                    onFailure = {
-                        // Sin conexión: no se puede confirmar cuáles
-                        // siguen existiendo, así que por seguridad no
-                        // se muestra ninguno en vez de mostrar datos
-                        // que ya no son válidos.
-                        emptySet()
+            SesionesRepository().obtenerPorUsuario(token, usuarioId).fold(
+                onSuccess = { sesiones ->
+                    // Convertir SesionResponse a EntrenamientoProgramado
+                    val entrenamientos = sesiones.map { sesion ->
+                        EntrenamientoProgramado(
+                            id                 = sesion.id.toLong(),
+                            rutinaId           = sesion.rutinaId,
+                            nombreRutina       = sesion.nombreRutina,
+                            descripcion        = "",
+                            nivel              = "",
+                            fecha              = formatearFecha(sesion.fechaProgramada),
+                            hora               = sesion.horaProgramada,
+                            duracionMinutos    = 0,
+                            cantidadEjercicios = sesion.ejercicios.size,
+                            objetivo           = "",
+                            completado         = sesion.estado == 2 // 2 = COMPLETADA
+                        )
                     }
-                )
+                    actualizarSecciones(entrenamientos)
+                },
+                onFailure = {
+                    // Si falla la API, intenta con los locales como fallback
+                    val entrenamientos = repository.obtenerEntrenamientos()
+                    actualizarSecciones(entrenamientos)
+                }
+            )
+        }
+    }
 
-            val entrenamientosValidos =
-                repository.obtenerEntrenamientos()
-                    .filter { it.rutinaId in idsRutinasValidas }
-
-            actualizarSecciones(entrenamientosValidos)
+    // Convierte "2026-08-14T00:00:00Z" → "14 ago. 2026"
+    private fun formatearFecha(fechaIso: String): String {
+        return try {
+            val entrada = java.text.SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                java.util.Locale.getDefault()
+            )
+            val salida = java.text.SimpleDateFormat(
+                "dd MMM yyyy",
+                java.util.Locale("es", "MX")
+            )
+            val date = entrada.parse(fechaIso) ?: return fechaIso
+            salida.format(date)
+        } catch (e: Exception) {
+            fechaIso.take(10) // fallback: "2026-08-14"
         }
     }
 

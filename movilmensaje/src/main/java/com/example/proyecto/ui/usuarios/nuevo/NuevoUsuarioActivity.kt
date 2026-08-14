@@ -87,7 +87,8 @@ class NuevoUsuarioActivity : AppCompatActivity() {
 
         val roles = listOf(
             "ADMINISTRADOR",
-            "OPERADOR"
+            "OPERADOR",
+            "CLIENTE"
         )
 
         val adapterRoles = ArrayAdapter(

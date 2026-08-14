@@ -128,7 +128,11 @@ class UsuariosFragment : Fragment() {
             val busqueda = editable?.toString()?.trim()?.lowercase().orEmpty()
             val lista = viewModel.usuarios.value ?: emptyList()
             val filtrados = if (busqueda.isBlank()) lista else lista.filter {
-                val rolTexto = if (it.rol == 0) "administrador" else "operador"
+                val rolTexto = when (it.rol) {
+                    0    -> "administrador"
+                    1    -> "operador"
+                    else -> "cliente"
+                }
                 it.nombre.lowercase().contains(busqueda) ||
                         it.correo.lowercase().contains(busqueda) ||
                         rolTexto.contains(busqueda)

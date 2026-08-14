@@ -179,80 +179,15 @@
             android:textColor="#9AA5B5"
             android:textSize="14sp"/>
 
-        <!-- EJERCICIO 1 -->
-
-        <com.google.android.material.card.MaterialCardView
+        <!-- EJERCICIOS (dinámico) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDetalleEjercicios"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
             android:layout_marginTop="18dp"
             android:layout_marginEnd="18dp"
-            app:cardBackgroundColor="#151B26"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="4dp"
-            app:strokeColor="#263242"
-            app:strokeWidth="1dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="22dp"
-                android:text="01   Press de banca&#10;       4 series • 10 repeticiones"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- EJERCICIO 2 -->
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="18dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="18dp"
-            app:cardBackgroundColor="#151B26"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="4dp"
-            app:strokeColor="#263242"
-            app:strokeWidth="1dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="22dp"
-                android:text="02   Press militar&#10;       4 series • 12 repeticiones"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- EJERCICIO 3 -->
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="18dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="18dp"
-            app:cardBackgroundColor="#151B26"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="4dp"
-            app:strokeColor="#263242"
-            app:strokeWidth="1dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="22dp"
-                android:text="03   Fondos de tríceps&#10;       3 series • 12 repeticiones"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
-
-        </com.google.android.material.card.MaterialCardView>
+            android:nestedScrollingEnabled="false"/>
 
         <!-- BOTÓN PRINCIPAL -->
 

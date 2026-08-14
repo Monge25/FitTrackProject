@@ -94,6 +94,7 @@ class MainActivity : AppCompatActivity() {
                             rol = state.rol,
                             email = state.email
                         )
+                        tokenManager.guardarUsuarioId(state.usuarioId)
                         irAPrincipal()
                     }
                 }

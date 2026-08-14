@@ -44,8 +44,7 @@ class CalendarioAdapter(
         fun bind(
             entrenamiento: EntrenamientoProgramado
         ) {
-            tvDia.text =
-                obtenerAbreviatura(entrenamiento.fecha)
+            tvDia.text = obtenerDiaDelMes(entrenamiento.fecha)
 
             tvNombre.text =
                 entrenamiento.nombreRutina
@@ -75,6 +74,18 @@ class CalendarioAdapter(
 
             itemView.setOnClickListener {
                 onEntrenamientoClick(entrenamiento)
+            }
+        }
+
+        private fun obtenerDiaDelMes(fecha: String): String {
+            return try {
+                val formato = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale("es", "MX"))
+                val date = formato.parse(fecha) ?: return fecha.take(2)
+                val cal  = java.util.Calendar.getInstance()
+                cal.time = date
+                cal.get(java.util.Calendar.DAY_OF_MONTH).toString()
+            } catch (e: Exception) {
+                fecha.take(2)
             }
         }
 

@@ -38,7 +38,11 @@ class UsuariosAdapter(
 
             tvNombre.text = usuario.nombre
             tvCorreo.text = usuario.correo
-            tvRol.text = if (usuario.rol == 0) "ADMINISTRADOR" else "OPERADOR"
+            tvRol.text = when (usuario.rol) {
+                0    -> "ADMINISTRADOR"
+                1    -> "OPERADOR"
+                else -> "CLIENTE"
+            }
 
             tvEstado.text =
                 if (usuario.esActivo) "ACTIVO" else "INACTIVO"

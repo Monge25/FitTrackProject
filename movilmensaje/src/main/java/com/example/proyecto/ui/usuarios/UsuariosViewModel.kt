@@ -44,7 +44,11 @@ class UsuariosViewModel : ViewModel() {
     fun registrarUsuario(token: String, nombre: String, email: String, password: String, rol: String) {
         _state.value = UsuariosState.Loading
         viewModelScope.launch {
-            val rolApi = if (rol == "ADMINISTRADOR") "ADMINISTRATOR" else "OPERATOR"
+            val rolApi = when (rol) {
+                "ADMINISTRADOR" -> "ADMINISTRATOR"
+                "OPERADOR"      -> "OPERATOR"
+                else            -> "CLIENT"
+            }
             repository.registrar(nombre, email, password, rolApi).fold(
                 onSuccess = {
                     _state.value = UsuariosState.Exito("Usuario creado correctamente")
@@ -68,7 +72,12 @@ class UsuariosViewModel : ViewModel() {
     ) {
         _state.value = UsuariosState.Loading
         viewModelScope.launch {
-            val rolNum = if (rol.uppercase().contains("ADMIN")) 0 else 1
+            val rolNum = when {
+                rol.uppercase().contains("ADMIN")    -> 0
+                rol.uppercase().contains("OPERATOR") ||
+                        rol.uppercase().contains("OPERADOR") -> 1
+                else                                  -> 2
+            }
             val request = ActualizarUsuarioRequest(
                 nombre   = nombre,
                 email    = correo,

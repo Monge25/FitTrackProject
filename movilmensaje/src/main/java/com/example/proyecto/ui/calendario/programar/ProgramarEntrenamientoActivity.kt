@@ -14,8 +14,10 @@ import com.example.proyecto.data.model.EjercicioApi
 import com.example.proyecto.data.model.EjercicioProgramado
 import com.example.proyecto.data.model.EntrenamientoProgramado
 import com.example.proyecto.data.model.Rutina
+import com.example.proyecto.data.model.SesionRequest
 import com.example.proyecto.data.repository.CalendarioRepository
 import com.example.proyecto.data.repository.RutinasRepository
+import com.example.proyecto.data.repository.SesionesRepository
 import com.example.proyecto.utils.TokenManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -265,60 +267,62 @@ class ProgramarEntrenamientoActivity : AppCompatActivity() {
     }
 
     private fun guardarEntrenamiento() {
-
         val fecha = etFecha.text?.toString()?.trim().orEmpty()
-        val hora = etHora.text?.toString()?.trim().orEmpty()
+        val hora  = etHora.text?.toString()?.trim().orEmpty()
 
-        val rutina = rutinaSeleccionada
-
-        if (rutina == null) {
-            actvRutina.error = "Selecciona una rutina de la lista"
+        if (rutinaSeleccionada == null) {
+            actvRutina.error = "Selecciona una rutina"
             return
         }
+        if (fecha.isBlank()) { etFecha.error = "Selecciona una fecha"; return }
+        if (hora.isBlank())  { etHora.error  = "Selecciona una hora";  return }
 
-        if (fecha.isBlank()) {
-            etFecha.error = "Selecciona una fecha"
-            return
-        }
+        btnGuardar.isEnabled = false
 
-        if (hora.isBlank()) {
-            etHora.error = "Selecciona una hora"
-            return
-        }
+        lifecycleScope.launch {
+            val token     = tokenManager.obtenerBearer()
+            val usuarioId = tokenManager.obtenerUsuarioId()
 
-        val ejerciciosProgramados = rutina.ejercicios.map { ej ->
-            EjercicioProgramado(
-                id = ej.id.toLong(),
-                nombre = ej.nombre,
-                series = ej.series,
-                repeticiones = ej.repeticiones,
-                pesoKg = ej.peso?.toFloat() ?: 0f,
-                descansoSegundos = ej.descanso,
-                notas = ej.notas ?: ""
+            val fechaIso = convertirFechaAIso(fecha)
+
+            val request = SesionRequest(
+                usuarioId       = usuarioId,
+                rutinaId        = rutinaSeleccionada!!.id,
+                fechaProgramada = fechaIso,
+                horaProgramada  = hora
+            )
+
+            SesionesRepository().programar(token, request).fold(
+                onSuccess = {
+                    Toast.makeText(
+                        this@ProgramarEntrenamientoActivity,
+                        "Entrenamiento programado correctamente",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    setResult(RESULT_OK)
+                    finish()
+                },
+                onFailure = { error ->
+                    btnGuardar.isEnabled = true
+                    Toast.makeText(
+                        this@ProgramarEntrenamientoActivity,
+                        error.message ?: "Error al programar",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             )
         }
+    }
 
-        val entrenamiento = EntrenamientoProgramado(
-            rutinaId = rutina.id,
-            nombreRutina = rutina.nombre,
-            nivel = nivelTexto(rutina.nivel),
-            fecha = fecha,
-            hora = hora,
-            duracionMinutos = calcularDuracionEstimada(rutina.ejercicios),
-            cantidadEjercicios = rutina.ejercicios.size,
-            objetivo = objetivoTexto(rutina.objetivo),
-            ejercicios = ejerciciosProgramados
-        )
-
-        CalendarioRepository(this).guardarEntrenamiento(entrenamiento)
-
-        Toast.makeText(
-            this,
-            "Entrenamiento programado correctamente",
-            Toast.LENGTH_SHORT
-        ).show()
-
-        setResult(RESULT_OK)
-        finish()
+    // Convierte "14 ago. 2026" → "2026-08-14T00:00:00Z"
+    private fun convertirFechaAIso(fecha: String): String {
+        return try {
+            val formato = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale("es", "MX"))
+            val date    = formato.parse(fecha.replace(".", "")) ?: return ""
+            val iso     = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+            "${iso.format(date)}T00:00:00Z"
+        } catch (e: Exception) {
+            ""
+        }
     }
 }

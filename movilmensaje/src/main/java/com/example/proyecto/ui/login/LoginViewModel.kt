@@ -17,7 +17,8 @@ class LoginViewModel : ViewModel() {
             val token: String,
             val nombre: String,
             val rol: String,
-            val email: String
+            val email: String,
+            val usuarioId: Int
         ) : LoginState()
         data class Error(val mensaje: String) : LoginState()
     }
@@ -42,7 +43,8 @@ class LoginViewModel : ViewModel() {
                         token = respuesta.token,
                         nombre = respuesta.nombre,
                         rol = respuesta.rol,
-                        email = respuesta.email
+                        email = respuesta.email,
+                        usuarioId =  respuesta.usuarioId
                     )
                 },
                 onFailure = { error ->
