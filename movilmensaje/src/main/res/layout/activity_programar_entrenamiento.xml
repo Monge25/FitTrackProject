@@ -50,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Elige una rutina, fecha y ejercicios para crear tu sesión."
+                android:text="Elige una rutina, fecha y hora para crear tu sesión."
                 android:textColor="#B7C0CD"
                 android:textSize="14sp"/>
 
@@ -100,33 +100,6 @@
 
                 <AutoCompleteTextView
                     android:id="@+id/actvRutinaProgramada"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:singleLine="true"
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#8D99A8" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- OBJETIVO -->
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Objetivo del entrenamiento"
-                app:boxBackgroundColor="#151B26"
-                app:boxCornerRadiusBottomEnd="18dp"
-                app:boxCornerRadiusBottomStart="18dp"
-                app:boxCornerRadiusTopEnd="18dp"
-                app:boxCornerRadiusTopStart="18dp"
-                app:boxStrokeColor="#2F7BFF"
-                app:hintTextColor="#8D99A8">
-
-                <AutoCompleteTextView
-                    android:id="@+id/actvObjetivoEntrenamiento"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"
@@ -203,78 +176,6 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
-
-            <!-- ================= EJERCICIOS ================= -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ejercicios"
-                        android:textColor="#FFFFFF"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Agrega los ejercicios en el orden que realizarás."
-                        android:textColor="#8D99A8"
-                        android:textSize="13sp" />
-
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAgregarEjercicio"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:text="Agregar"
-                    android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    app:backgroundTint="#2F7BFF"
-                    app:cornerRadius="18dp"
-                    app:elevation="4dp" />
-
-            </LinearLayout>
-
-            <!-- MENSAJE SIN EJERCICIOS -->
-
-            <TextView
-                android:id="@+id/tvSinEjerciciosProgramados"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/edittext_dark"
-                android:gravity="center"
-                android:padding="24dp"
-                android:text="Todavía no has agregado ejercicios."
-                android:textColor="#8D99A8"
-                android:textSize="14sp" />
-
-            <!-- LISTA -->
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvEjerciciosProgramados"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:nestedScrollingEnabled="false"
-                android:visibility="gone"
-                tools:listitem="@layout/item_ejercicio_programado" />
 
             <!-- ================= RESUMEN ================= -->
 

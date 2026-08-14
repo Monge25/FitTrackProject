@@ -18,6 +18,7 @@ class TokenManager(
         private val TOKEN_KEY = stringPreferencesKey("token")
         private val NOMBRE_KEY = stringPreferencesKey("nombre")
         private val ROL_KEY = stringPreferencesKey("rol")
+        private val EMAIL_KEY = stringPreferencesKey("email")
     }
 
     suspend fun guardarToken(token: String) {
@@ -44,11 +45,15 @@ class TokenManager(
 
     suspend fun guardarDatosUsuario(
         nombre: String,
-        rol: String
+        rol: String,
+        email: String = ""
     ) {
         context.dataStore.edit { preferences ->
             preferences[NOMBRE_KEY] = nombre
             preferences[ROL_KEY] = rol
+            if (email.isNotBlank()) {
+                preferences[EMAIL_KEY] = email
+            }
         }
     }
 
@@ -62,6 +67,12 @@ class TokenManager(
         val preferences = context.dataStore.data.first()
 
         return preferences[ROL_KEY] ?: "OPERADOR"
+    }
+
+    suspend fun obtenerEmail(): String {
+        val preferences = context.dataStore.data.first()
+
+        return preferences[EMAIL_KEY] ?: ""
     }
 
     suspend fun cerrarSesion() {

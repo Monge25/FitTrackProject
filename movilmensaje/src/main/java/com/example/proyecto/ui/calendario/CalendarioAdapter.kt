@@ -57,18 +57,18 @@ class CalendarioAdapter(
                 "${entrenamiento.duracionMinutos} minutos"
 
             tvEstado.text =
-                if (entrenamiento.completado) {
-                    "COMPLETADO"
-                } else {
-                    "PENDIENTE"
+                when (entrenamiento.calcularEstado()) {
+                    EstadoEntrenamiento.CUMPLIDA -> "CUMPLIDA"
+                    EstadoEntrenamiento.VENCIDA -> "VENCIDA"
+                    EstadoEntrenamiento.PROXIMA -> "PRÓXIMA"
                 }
 
             tvEstado.setTextColor(
                 itemView.context.getColor(
-                    if (entrenamiento.completado) {
-                        android.R.color.holo_green_dark
-                    } else {
-                        android.R.color.holo_orange_dark
+                    when (entrenamiento.calcularEstado()) {
+                        EstadoEntrenamiento.CUMPLIDA -> android.R.color.holo_green_dark
+                        EstadoEntrenamiento.VENCIDA -> android.R.color.holo_red_light
+                        EstadoEntrenamiento.PROXIMA -> android.R.color.holo_orange_dark
                     }
                 )
             )

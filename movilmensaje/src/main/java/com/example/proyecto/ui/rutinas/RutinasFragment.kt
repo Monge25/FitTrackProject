@@ -97,6 +97,16 @@ class RutinasFragment : Fragment() {
     private fun observarViewModel() {
         viewModel.rutinas.observe(viewLifecycleOwner) { lista ->
             adapter.actualizarLista(lista)
+
+            // El RecyclerView vive dentro de un ScrollView con altura
+            // "wrap_content"; cuando los datos llegan después del
+            // primer dibujado (como aquí, que vienen del backend de
+            // forma asíncrona), se queda con el tamaño viejo si no se
+            // le pide explícitamente que se vuelva a medir.
+            rvRutinas.post {
+                rvRutinas.requestLayout()
+            }
+
             tvCantidadRutinas.text = "${lista.size} planes disponibles"
 
             val destacada = lista.firstOrNull()

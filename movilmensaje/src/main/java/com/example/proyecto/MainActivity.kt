@@ -91,7 +91,8 @@ class MainActivity : AppCompatActivity() {
                         tokenManager.guardarToken(state.token)
                         tokenManager.guardarDatosUsuario(
                             nombre = state.nombre,
-                            rol = state.rol
+                            rol = state.rol,
+                            email = state.email
                         )
                         irAPrincipal()
                     }

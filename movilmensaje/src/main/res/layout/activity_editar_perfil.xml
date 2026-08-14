@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#070B12"
+    android:fillViewport="true"
     android:scrollbars="none">
 
     <LinearLayout
@@ -18,15 +19,15 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="230dp"
+            android:layout_height="wrap_content"
             android:background="@drawable/fondo_encabezado_dashboard"
-            android:gravity="bottom"
             android:orientation="vertical"
             android:padding="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:letterSpacing="0.15"
                 android:text="MI CUENTA"
                 android:textColor="#2F7BFF"
                 android:textSize="12sp"
@@ -45,13 +46,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Actualiza tu información personal."
+                android:text="Actualiza tus datos físicos y tu objetivo de entrenamiento."
                 android:textColor="#B7C0CD"
                 android:textSize="14sp"/>
 
         </LinearLayout>
 
-        <!-- FORMULARIO -->
+        <!-- CONTENIDO -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -59,53 +60,238 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <EditText
-                android:id="@+id/etEditarNombrePerfil"
-                android:layout_width="match_parent"
-                android:layout_height="58dp"
-                android:backgroundTint="#151B26"
-                android:background="@drawable/edittext_dark"
-                android:hint="Nombre completo"
-                android:textColor="#FFFFFF"
-                app:hintTextColor="#8D99A8"
-                android:padding="16dp"/>
+            <!-- ================= TARJETA DE CUENTA (SOLO LECTURA) ================= -->
 
-            <EditText
-                android:id="@+id/etEditarPesoPerfil"
-                android:layout_width="match_parent"
-                android:layout_height="58dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/edittext_dark"
-                android:hint="Peso en kg"
-                android:inputType="numberDecimal"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tu cuenta"
                 android:textColor="#FFFFFF"
-                app:hintTextColor="#8D99A8"
-                android:padding="16dp"/>
+                android:textSize="17sp"
+                android:textStyle="bold"/>
 
-            <EditText
-                android:id="@+id/etEditarAlturaPerfil"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="14dp"
+                android:text="Datos de tu sesión, no se pueden editar aquí"
+                android:textColor="#8D99A8"
+                android:textSize="12sp"/>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="58dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/edittext_dark"
-                android:hint="Altura en metros"
-                android:inputType="numberDecimal"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#151B26"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
+                app:strokeColor="#263242"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <!-- NOMBRE Y AVATAR -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            app:cardBackgroundColor="#2F7BFF"
+                            app:cardCornerRadius="23dp"
+                            app:strokeColor="#79AFFF"
+                            app:strokeWidth="2dp">
+
+                            <TextView
+                                android:id="@+id/tvEditarAvatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="A"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvEditarNombreCuenta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Alexa Gastélum"
+                                android:textColor="#FFFFFF"
+                                android:textSize="16sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:id="@+id/tvEditarRolCuenta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Administrador"
+                                android:textColor="#79AFFF"
+                                android:textSize="12sp"
+                                android:textStyle="bold"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- DIVISOR -->
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="14dp"
+                        android:background="#263242"/>
+
+                    <!-- CORREO -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_mail"
+                            app:tint="#8D99A8"/>
+
+                        <TextView
+                            android:id="@+id/tvEditarCorreoCuenta"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:text="correo@fittrack.com"
+                            android:textColor="#B7C0CD"
+                            android:textSize="13sp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ================= DATOS FÍSICOS (EDITABLES) ================= -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="Datos físicos y objetivo"
                 android:textColor="#FFFFFF"
-                app:hintTextColor="#8D99A8"
-                android:padding="16dp"/>
+                android:textSize="17sp"
+                android:textStyle="bold"/>
 
-            <EditText
-                android:id="@+id/etEditarObjetivoPerfil"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="14dp"
+                android:text="Esta información se usa para calcular tu IMC"
+                android:textColor="#8D99A8"
+                android:textSize="12sp"/>
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:hint="Peso (kg)"
+                    app:boxBackgroundColor="#151B26"
+                    app:boxCornerRadiusBottomEnd="18dp"
+                    app:boxCornerRadiusBottomStart="18dp"
+                    app:boxCornerRadiusTopEnd="18dp"
+                    app:boxCornerRadiusTopStart="18dp"
+                    app:boxStrokeColor="#2F7BFF"
+                    app:hintTextColor="#8D99A8">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEditarPesoPerfil"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#8D99A8"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:hint="Altura (m)"
+                    app:boxBackgroundColor="#151B26"
+                    app:boxCornerRadiusBottomEnd="18dp"
+                    app:boxCornerRadiusBottomStart="18dp"
+                    app:boxCornerRadiusTopEnd="18dp"
+                    app:boxCornerRadiusTopStart="18dp"
+                    app:boxStrokeColor="#2F7BFF"
+                    app:hintTextColor="#8D99A8">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEditarAlturaPerfil"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#8D99A8"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/edittext_dark"
-                android:gravity="top"
                 android:hint="Objetivo personal"
-                android:inputType="textMultiLine"
-                android:textColor="#FFFFFF"
-                app:hintTextColor="#8D99A8"
-                android:padding="16dp"/>
+                app:boxBackgroundColor="#151B26"
+                app:boxCornerRadiusBottomEnd="18dp"
+                app:boxCornerRadiusBottomStart="18dp"
+                app:boxCornerRadiusTopEnd="18dp"
+                app:boxCornerRadiusTopStart="18dp"
+                app:boxStrokeColor="#2F7BFF"
+                app:hintTextColor="#8D99A8">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEditarObjetivoPerfil"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:gravity="top"
+                    android:inputType="textMultiLine"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#8D99A8"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- BOTÓN GUARDAR -->
 
@@ -114,6 +300,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="28dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Guardar cambios"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
@@ -121,7 +309,10 @@
                 android:textStyle="bold"
                 app:backgroundTint="#2F7BFF"
                 app:cornerRadius="22dp"
-                app:elevation="5dp"/>
+                app:elevation="5dp"
+                app:icon="@drawable/ic_check"
+                app:iconGravity="textStart"
+                app:iconTint="#FFFFFF"/>
 
             <!-- BOTÓN CANCELAR -->
 
@@ -130,6 +321,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
                 android:layout_marginTop="14dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Cancelar"
                 android:textAllCaps="false"
                 android:textColor="#2F7BFF"

@@ -2,9 +2,9 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="app">
+      <SelectionState runConfigName="movilmensaje">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-08-12T18:45:34.634179800Z">
+        <DropdownSelection timestamp="2026-08-12T18:45:45.043661Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="Default" identifier="serial=127.0.0.1:21503;connection=4cfa3dd0" />
@@ -13,12 +13,12 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="movilmensaje">
+      <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-08-12T18:45:45.043661Z">
+        <DropdownSelection timestamp="2026-08-13T14:52:14.297622Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="Default" identifier="serial=127.0.0.1:21503;connection=4cfa3dd0" />
+              <DeviceId pluginId="Default" identifier="serial=127.0.0.1:21503;connection=689d34fb" />
             </handle>
           </Target>
         </DropdownSelection>

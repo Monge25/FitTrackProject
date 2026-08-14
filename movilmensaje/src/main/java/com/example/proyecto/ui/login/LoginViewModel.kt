@@ -16,7 +16,8 @@ class LoginViewModel : ViewModel() {
         data class Success(
             val token: String,
             val nombre: String,
-            val rol: String
+            val rol: String,
+            val email: String
         ) : LoginState()
         data class Error(val mensaje: String) : LoginState()
     }
@@ -40,7 +41,8 @@ class LoginViewModel : ViewModel() {
                     _loginState.value = LoginState.Success(
                         token = respuesta.token,
                         nombre = respuesta.nombre,
-                        rol = respuesta.rol
+                        rol = respuesta.rol,
+                        email = respuesta.email
                     )
                 },
                 onFailure = { error ->

@@ -47,48 +47,117 @@
 
             </LinearLayout>
 
-            <!-- AVATAR -->
+            <!-- AVATAR + BADGE EDITAR -->
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="98dp"
-                android:layout_height="98dp"
-                android:layout_marginTop="20dp"
-                app:cardBackgroundColor="#2F7BFF"
-                app:cardCornerRadius="49dp"
-                app:cardElevation="8dp"
-                app:strokeColor="#79AFFF"
-                app:strokeWidth="4dp">
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp">
 
-                <TextView
-                    android:id="@+id/tvAvatarPerfil"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="A"
-                    android:textColor="#FFFFFF"
-                    android:textSize="36sp"
-                    android:textStyle="bold"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:cardBackgroundColor="#2F7BFF"
+                    app:cardCornerRadius="50dp"
+                    app:cardElevation="10dp"
+                    app:strokeColor="#79AFFF"
+                    app:strokeWidth="4dp">
 
-            </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:id="@+id/tvAvatarPerfil"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="A"
+                        android:textColor="#FFFFFF"
+                        android:textSize="36sp"
+                        android:textStyle="bold"/>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnEditarAvatar"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="-2dp"
+                    android:layout_marginBottom="-2dp"
+                    android:checkable="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="#2F7BFF"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="6dp"
+                    app:strokeColor="#070B12"
+                    app:strokeWidth="2.5dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="Editar perfil"
+                        android:src="@drawable/ic_edit"/>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/tvNombrePerfil"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Alexa Gastélum"
+                android:gravity="center"
+                android:text="Usuario"
                 android:textColor="#FFFFFF"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/tvRolPerfil"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Administrador"
-                android:textColor="#B7C0CD"
-                android:textSize="14sp"/>
+                android:layout_marginTop="6dp"
+                android:background="@drawable/fondo_chip_translucido"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:id="@+id/tvRolPerfil"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rol"
+                    android:textColor="#79AFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:alpha="0.7"
+                    android:src="@drawable/ic_mail"
+                    app:tint="#B7C0CD"/>
+
+                <TextView
+                    android:id="@+id/tvCorreoPerfil"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="correo@fittrack.com"
+                    android:textColor="#B7C0CD"
+                    android:textSize="13sp"/>
+
+            </LinearLayout>
 
             <!-- CHIP ESTADO -->
 
@@ -126,7 +195,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="20dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
@@ -182,46 +251,48 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="150dp"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="#151B26"
                 app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="#263242"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="104dp"
                     android:gravity="center"
                     android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:background="@drawable/fondo_icono_azul"
                         android:gravity="center"
                         android:text="KG"
                         android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:textStyle="bold"/>
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvPesoPerfil"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="72 kg"
+                        android:text="Sin datos"
                         android:textColor="#FFFFFF"
-                        android:textSize="24sp"
-                        android:textStyle="bold"/>
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
                         android:text="Peso"
                         android:textColor="#8D99A8"
-                        android:textSize="13sp"/>
+                        android:textSize="12sp" />
 
                 </LinearLayout>
 
@@ -231,46 +302,48 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="150dp"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 app:cardBackgroundColor="#151B26"
                 app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="#263242"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="104dp"
                     android:gravity="center"
                     android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:background="@drawable/fondo_icono_azul"
                         android:gravity="center"
                         android:text="M"
                         android:textColor="#FFFFFF"
-                        android:textSize="15sp"
-                        android:textStyle="bold"/>
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvAlturaPerfil"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="1.75 m"
+                        android:text="Sin datos"
                         android:textColor="#FFFFFF"
-                        android:textSize="24sp"
-                        android:textStyle="bold"/>
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
                         android:text="Altura"
                         android:textColor="#8D99A8"
-                        android:textSize="13sp"/>
+                        android:textSize="12sp" />
 
                 </LinearLayout>
 
@@ -287,26 +360,28 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="20dp"
             app:cardBackgroundColor="#2F7BFF"
-            app:cardCornerRadius="22dp">
+            app:cardCornerRadius="22dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:padding="22dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.05"
                     android:text="ÍNDICE DE MASA CORPORAL"
                     android:textColor="#DCE8FF"
                     android:textSize="11sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:gravity="bottom"
                     android:orientation="horizontal">
 
@@ -314,10 +389,10 @@
                         android:id="@+id/tvImcPerfil"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="23.5"
+                        android:text="--"
                         android:textColor="#FFFFFF"
-                        android:textSize="36sp"
-                        android:textStyle="bold"/>
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvEstadoImcPerfil"
@@ -325,11 +400,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:gravity="end"
-                        android:paddingBottom="6dp"
-                        android:text="Peso saludable"
+                        android:background="@drawable/fondo_chip_translucido"
+                        android:gravity="center"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="7dp"
+                        android:text="Sin datos"
                         android:textColor="#FFFFFF"
-                        android:textSize="15sp"/>
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
 
                 </LinearLayout>
 
@@ -343,7 +421,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="20dp"
             android:orientation="vertical">
 
@@ -369,20 +447,32 @@
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="#151B26"
                 app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="#263242"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="18dp">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/fondo_icono_azul"
+                        android:contentDescription="@null"
+                        android:padding="11dp"
+                        android:src="@drawable/ic_target"/>
 
                     <TextView
                         android:id="@+id/tvObjetivoPerfil"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Ganar masa muscular y mejorar la resistencia."
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:text="Todavía no has definido un objetivo."
                         android:textColor="#FFFFFF"
                         android:textSize="15sp"/>
 
@@ -398,7 +488,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="20dp"
             android:orientation="vertical">
 
@@ -424,6 +514,7 @@
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="#151B26"
                 app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="#263242"
                 app:strokeWidth="1dp">
 
@@ -432,17 +523,16 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="20dp">
+                    android:padding="18dp">
 
-                    <TextView
+                    <ImageView
                         android:id="@+id/tvIconoWatch"
                         android:layout_width="54dp"
                         android:layout_height="54dp"
                         android:background="@drawable/fondo_icono_azul"
-                        android:gravity="center"
-                        android:text="⌚"
-                        android:textColor="#FFFFFF"
-                        android:textSize="22sp"/>
+                        android:contentDescription="@null"
+                        android:padding="13dp"
+                        android:src="@drawable/ic_watch"/>
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -455,7 +545,7 @@
                             android:id="@+id/tvModeloWatch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Galaxy Watch"
+                            android:text="FitTrack Watch"
                             android:textColor="#FFFFFF"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -498,7 +588,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="20dp"
             android:orientation="vertical">
 
@@ -515,13 +605,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
                 android:layout_marginTop="16dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Editar perfil"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:backgroundTint="#2F7BFF"
-                app:cornerRadius="22dp"/>
+                app:cornerRadius="22dp"
+                app:icon="@drawable/ic_edit"
+                app:iconGravity="textStart"
+                app:iconTint="#FFFFFF"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCerrarSesion"
@@ -529,6 +624,8 @@
                 android:layout_height="58dp"
                 android:layout_marginTop="14dp"
                 android:layout_marginBottom="24dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Cerrar sesión"
                 android:textAllCaps="false"
                 android:textColor="#FF6B81"
@@ -536,6 +633,9 @@
                 android:textStyle="bold"
                 app:backgroundTint="#151B26"
                 app:cornerRadius="22dp"
+                app:icon="@drawable/ic_logout"
+                app:iconGravity="textStart"
+                app:iconTint="#FF6B81"
                 app:strokeColor="#FF6B81"
                 app:strokeWidth="1dp"/>
 

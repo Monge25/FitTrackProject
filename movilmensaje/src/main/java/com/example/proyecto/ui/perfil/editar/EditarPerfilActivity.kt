@@ -2,11 +2,15 @@ package com.example.proyecto.ui.perfil.editar
 import com.example.movilmensaje.R
 
 import android.os.Bundle
-import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.proyecto.data.repository.PerfilRepository
+import com.example.proyecto.utils.TokenManager
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.launch
 
 class EditarPerfilActivity : AppCompatActivity() {
 
@@ -22,39 +26,61 @@ class EditarPerfilActivity : AppCompatActivity() {
         val repository =
             PerfilRepository(this)
 
-        val perfil =
-            repository.obtenerPerfil()
+        val tokenManager =
+            TokenManager(this)
 
-        val etNombre =
-            findViewById<EditText>(
-                R.id.etEditarNombrePerfil
-            )
+        val tvAvatar =
+            findViewById<TextView>(R.id.tvEditarAvatar)
+
+        val tvNombreCuenta =
+            findViewById<TextView>(R.id.tvEditarNombreCuenta)
+
+        val tvCorreoCuenta =
+            findViewById<TextView>(R.id.tvEditarCorreoCuenta)
+
+        val tvRolCuenta =
+            findViewById<TextView>(R.id.tvEditarRolCuenta)
 
         val etPeso =
-            findViewById<EditText>(
+            findViewById<TextInputEditText>(
                 R.id.etEditarPesoPerfil
             )
 
         val etAltura =
-            findViewById<EditText>(
+            findViewById<TextInputEditText>(
                 R.id.etEditarAlturaPerfil
             )
 
         val etObjetivo =
-            findViewById<EditText>(
+            findViewById<TextInputEditText>(
                 R.id.etEditarObjetivoPerfil
             )
 
-        etNombre.setText(perfil.nombre)
-        etPeso.setText(perfil.peso.toString())
-        etAltura.setText(perfil.altura.toString())
-        etObjetivo.setText(perfil.objetivo)
+        lifecycleScope.launch {
+
+            val perfil = repository.obtenerPerfil()
+
+            tvAvatar.text =
+                perfil.nombre.firstOrNull()
+                    ?.uppercase()
+                    ?: "U"
+
+            tvNombreCuenta.text =
+                perfil.nombre.ifBlank { "Usuario FitTrack" }
+
+            tvCorreoCuenta.text =
+                perfil.email.ifBlank { "Sin correo registrado" }
+
+            tvRolCuenta.text = perfil.rol
+
+            etPeso.setText(perfil.peso.toString())
+            etAltura.setText(perfil.altura.toString())
+            etObjetivo.setText(perfil.objetivo)
+        }
 
         findViewById<MaterialButton>(
             R.id.btnGuardarPerfil
         ).setOnClickListener {
-            val nombre =
-                etNombre.text.toString().trim()
 
             val peso =
                 etPeso.text.toString().toFloatOrNull()
@@ -64,11 +90,6 @@ class EditarPerfilActivity : AppCompatActivity() {
 
             val objetivo =
                 etObjetivo.text.toString().trim()
-
-            if (nombre.isBlank()) {
-                etNombre.error = "Ingresa tu nombre"
-                return@setOnClickListener
-            }
 
             if (peso == null || peso <= 0) {
                 etPeso.error = "Ingresa un peso válido"
@@ -80,13 +101,10 @@ class EditarPerfilActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            repository.guardarPerfil(
-                perfil.copy(
-                    nombre = nombre,
-                    peso = peso,
-                    altura = altura,
-                    objetivo = objetivo
-                )
+            repository.guardarDatosFisicos(
+                peso = peso,
+                altura = altura,
+                objetivo = objetivo
             )
 
             Toast.makeText(

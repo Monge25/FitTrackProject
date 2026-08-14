@@ -8,10 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.proyecto.MainActivity
 import com.example.proyecto.data.repository.PerfilRepository
 import com.example.proyecto.ui.perfil.editar.EditarPerfilActivity
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 class PerfilFragment : Fragment() {
@@ -19,6 +21,7 @@ class PerfilFragment : Fragment() {
     private lateinit var tvAvatar: TextView
     private lateinit var tvNombre: TextView
     private lateinit var tvRol: TextView
+    private lateinit var tvCorreo: TextView
     private lateinit var tvPeso: TextView
     private lateinit var tvAltura: TextView
     private lateinit var tvImc: TextView
@@ -65,6 +68,7 @@ class PerfilFragment : Fragment() {
         tvAvatar = view.findViewById(R.id.tvAvatarPerfil)
         tvNombre = view.findViewById(R.id.tvNombrePerfil)
         tvRol = view.findViewById(R.id.tvRolPerfil)
+        tvCorreo = view.findViewById(R.id.tvCorreoPerfil)
         tvPeso = view.findViewById(R.id.tvPesoPerfil)
         tvAltura = view.findViewById(R.id.tvAlturaPerfil)
         tvImc = view.findViewById(R.id.tvImcPerfil)
@@ -77,16 +81,20 @@ class PerfilFragment : Fragment() {
 
     private fun configurarEventos() {
 
-        view?.findViewById<MaterialButton>(R.id.btnEditarPerfil)
-            ?.setOnClickListener {
-
-                startActivity(
-                    Intent(
-                        requireContext(),
-                        EditarPerfilActivity::class.java
-                    )
+        val irAEditar = View.OnClickListener {
+            startActivity(
+                Intent(
+                    requireContext(),
+                    EditarPerfilActivity::class.java
                 )
-            }
+            )
+        }
+
+        view?.findViewById<MaterialButton>(R.id.btnEditarPerfil)
+            ?.setOnClickListener(irAEditar)
+
+        view?.findViewById<View>(R.id.btnEditarAvatar)
+            ?.setOnClickListener(irAEditar)
 
         view?.findViewById<MaterialButton>(R.id.btnCerrarSesion)
             ?.setOnClickListener {
@@ -106,63 +114,71 @@ class PerfilFragment : Fragment() {
 
     private fun cargarPerfil() {
 
-        val perfil = repository.obtenerPerfil()
+        viewLifecycleOwner.lifecycleScope.launch {
 
-        tvAvatar.text =
-            perfil.nombre.firstOrNull()
-                ?.uppercase()
-                ?: "U"
+            val perfil = repository.obtenerPerfil()
 
-        tvNombre.text = perfil.nombre
-        tvRol.text = perfil.rol
+            tvAvatar.text =
+                perfil.nombre.firstOrNull()
+                    ?.uppercase()
+                    ?: "U"
 
-        tvPeso.text =
-            String.format(
-                Locale.getDefault(),
-                "%.1f kg",
-                perfil.peso
-            )
+            tvNombre.text =
+                perfil.nombre.ifBlank { "Usuario FitTrack" }
 
-        tvAltura.text =
-            String.format(
-                Locale.getDefault(),
-                "%.2f m",
-                perfil.altura
-            )
+            tvRol.text = perfil.rol
 
-        val imc = perfil.calcularImc()
+            tvCorreo.text =
+                perfil.email.ifBlank { "Sin correo registrado" }
 
-        tvImc.text =
-            String.format(
-                Locale.getDefault(),
-                "%.1f",
-                imc
-            )
+            tvPeso.text =
+                String.format(
+                    Locale.getDefault(),
+                    "%.1f kg",
+                    perfil.peso
+                )
 
-        tvEstadoImc.text =
-            descripcionImc(imc)
+            tvAltura.text =
+                String.format(
+                    Locale.getDefault(),
+                    "%.2f m",
+                    perfil.altura
+                )
 
-        tvObjetivo.text = perfil.objetivo
+            val imc = perfil.calcularImc()
 
-        // Modelo real del smartwatch, en vez del texto fijo
-        // "Galaxy Watch" que traía el layout.
-        tvModeloWatch.text = perfil.smartwatch
+            tvImc.text =
+                String.format(
+                    Locale.getDefault(),
+                    "%.1f",
+                    imc
+                )
 
-        if (perfil.smartwatchConectado) {
+            tvEstadoImc.text =
+                descripcionImc(imc)
 
-            tvEstadoWatch.text = "Conectado"
+            tvObjetivo.text = perfil.objetivo
 
-            vPuntoWatch.setBackgroundResource(
-                R.drawable.fondo_punto_online
-            )
+            // Modelo real del smartwatch, en vez del texto fijo
+            // "Galaxy Watch" que traía el layout.
+            tvModeloWatch.text = perfil.smartwatch
 
-        } else {
+            if (perfil.smartwatchConectado) {
 
-            tvEstadoWatch.text = "Desconectado"
+                tvEstadoWatch.text = "Conectado"
 
-            vPuntoWatch.setBackgroundResource(
-                R.drawable.fondo_punto_offline
-            )
+                vPuntoWatch.setBackgroundResource(
+                    R.drawable.fondo_punto_online
+                )
+
+            } else {
+
+                tvEstadoWatch.text = "Desconectado"
+
+                vPuntoWatch.setBackgroundResource(
+                    R.drawable.fondo_punto_offline
+                )
+            }
         }
     }
 

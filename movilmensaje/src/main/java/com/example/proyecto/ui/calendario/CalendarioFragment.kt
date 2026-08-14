@@ -1,7 +1,6 @@
 package com.example.proyecto.ui.calendario
 import com.example.movilmensaje.R
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,28 +9,40 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.proyecto.data.model.EntrenamientoProgramado
 import com.example.proyecto.data.repository.CalendarioRepository
+import com.example.proyecto.data.repository.RutinasRepository
 import com.example.proyecto.ui.calendario.programar.ProgramarEntrenamientoActivity
 import com.example.proyecto.ui.rutinas.detalle.DetalleRutinaActivity
+import com.example.proyecto.utils.TokenManager
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import kotlinx.coroutines.launch
 
 class CalendarioFragment : Fragment() {
 
     private lateinit var rvCalendario: RecyclerView
+    private lateinit var rvCalendarioCumplidos: RecyclerView
+    private lateinit var rvCalendarioVencidos: RecyclerView
+
     private lateinit var tvResumenCalendario: TextView
     private lateinit var tvResumenCompletados: TextView
+
     private lateinit var tvCalendarioVacio: TextView
-    private lateinit var btnProgramarEntrenamiento:
-            ExtendedFloatingActionButton
+    private lateinit var tvCalendarioCumplidosVacio: TextView
+    private lateinit var tvCalendarioVencidosVacio: TextView
 
-    private lateinit var repository:
-            CalendarioRepository
+    private lateinit var btnProgramarEntrenamiento: ExtendedFloatingActionButton
 
-    private lateinit var adapter:
-            CalendarioAdapter
+    private lateinit var repository: CalendarioRepository
+    private val rutinasRepository = RutinasRepository()
+    private lateinit var tokenManager: TokenManager
+
+    private lateinit var adapterProximos: CalendarioAdapter
+    private lateinit var adapterCumplidos: CalendarioAdapter
+    private lateinit var adapterVencidos: CalendarioAdapter
 
     private val programarLauncher =
         registerForActivityResult(
@@ -45,34 +56,18 @@ class CalendarioFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        return inflater.inflate(
-            R.layout.fragment_calendario,
-            container,
-            false
-        )
+        return inflater.inflate(R.layout.fragment_calendario, container, false)
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?
-    ) {
-        super.onViewCreated(
-            view,
-            savedInstanceState
-        )
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        repository =
-            CalendarioRepository(
-                requireContext()
-            )
+        repository = CalendarioRepository(requireContext())
+        tokenManager = TokenManager(requireContext())
 
         enlazarVistas(view)
-
-        configurarRecyclerView()
-
+        configurarRecyclerViews()
         configurarEventos()
-
         cargarEntrenamientos()
     }
 
@@ -84,228 +79,133 @@ class CalendarioFragment : Fragment() {
         }
     }
 
-    private fun enlazarVistas(
-        view: View
-    ) {
+    private fun enlazarVistas(view: View) {
 
-        rvCalendario =
-            view.findViewById(
-                R.id.rvCalendario
-            )
+        rvCalendario = view.findViewById(R.id.rvCalendario)
+        rvCalendarioCumplidos = view.findViewById(R.id.rvCalendarioCumplidos)
+        rvCalendarioVencidos = view.findViewById(R.id.rvCalendarioVencidos)
 
-        tvResumenCalendario =
-            view.findViewById(
-                R.id.tvResumenCalendario
-            )
+        tvResumenCalendario = view.findViewById(R.id.tvResumenCalendario)
+        tvResumenCompletados = view.findViewById(R.id.tvResumenCompletados)
 
-        tvResumenCompletados =
-            view.findViewById(
-                R.id.tvResumenCompletados
-            )
+        tvCalendarioVacio = view.findViewById(R.id.tvCalendarioVacio)
+        tvCalendarioCumplidosVacio = view.findViewById(R.id.tvCalendarioCumplidosVacio)
+        tvCalendarioVencidosVacio = view.findViewById(R.id.tvCalendarioVencidosVacio)
 
-        tvCalendarioVacio =
-            view.findViewById(
-                R.id.tvCalendarioVacio
-            )
-
-        btnProgramarEntrenamiento =
-            view.findViewById(
-                R.id.btnProgramarEntrenamiento
-            )
+        btnProgramarEntrenamiento = view.findViewById(R.id.btnProgramarEntrenamiento)
     }
 
-    private fun configurarRecyclerView() {
+    private fun configurarRecyclerViews() {
 
-        adapter = CalendarioAdapter(
-            emptyList()
-        ) { entrenamiento ->
+        adapterProximos = CalendarioAdapter(emptyList()) { abrirDetalleEntrenamiento(it) }
+        adapterCumplidos = CalendarioAdapter(emptyList()) { abrirDetalleEntrenamiento(it) }
+        adapterVencidos = CalendarioAdapter(emptyList()) { abrirDetalleEntrenamiento(it) }
 
-            abrirDetalleEntrenamiento(
-                entrenamiento
-            )
-        }
+        rvCalendario.layoutManager = LinearLayoutManager(requireContext())
+        rvCalendario.adapter = adapterProximos
 
-        rvCalendario.layoutManager =
-            LinearLayoutManager(
-                requireContext()
-            )
+        rvCalendarioCumplidos.layoutManager = LinearLayoutManager(requireContext())
+        rvCalendarioCumplidos.adapter = adapterCumplidos
 
-        rvCalendario.adapter =
-            adapter
+        rvCalendarioVencidos.layoutManager = LinearLayoutManager(requireContext())
+        rvCalendarioVencidos.adapter = adapterVencidos
     }
 
     private fun configurarEventos() {
 
-        btnProgramarEntrenamiento
-            .setOnClickListener {
-
-                val intent = Intent(
-                    requireContext(),
-                    ProgramarEntrenamientoActivity::class.java
-                )
-
-                programarLauncher.launch(
-                    intent
-                )
-            }
+        btnProgramarEntrenamiento.setOnClickListener {
+            val intent = Intent(requireContext(), ProgramarEntrenamientoActivity::class.java)
+            programarLauncher.launch(intent)
+        }
     }
 
+    /**
+     * Carga los entrenamientos programados (guardados en el
+     * teléfono) y los filtra para quedarse solo con los que
+     * pertenecen a una rutina que TODAVÍA existe y está activa en la
+     * base de datos real — si borraste o desactivaste una rutina
+     * después de haberla programado, ese entrenamiento ya no
+     * aparece. Después los separa en Próximos / Cumplidos / Vencidos.
+     */
     private fun cargarEntrenamientos() {
 
-        val entrenamientos =
-            repository.obtenerEntrenamientos()
+        lifecycleScope.launch {
 
-        adapter.actualizarLista(
-            entrenamientos
-        )
+            val token = tokenManager.obtenerBearer()
 
-        val completados =
-            entrenamientos.count {
-                it.completado
-            }
+            val idsRutinasValidas: Set<Int> =
+                rutinasRepository.obtenerTodas(token).fold(
+                    onSuccess = { rutinas ->
+                        rutinas.filter { it.esActivo }.map { it.id }.toSet()
+                    },
+                    onFailure = {
+                        // Sin conexión: no se puede confirmar cuáles
+                        // siguen existiendo, así que por seguridad no
+                        // se muestra ninguno en vez de mostrar datos
+                        // que ya no son válidos.
+                        emptySet()
+                    }
+                )
 
-        tvResumenCalendario.text =
-            "${entrenamientos.size} entrenamientos programados"
+            val entrenamientosValidos =
+                repository.obtenerEntrenamientos()
+                    .filter { it.rutinaId in idsRutinasValidas }
 
-        tvResumenCompletados.text =
-            "$completados completados"
-
-        val estaVacio =
-            entrenamientos.isEmpty()
-
-        rvCalendario.visibility =
-            if (estaVacio) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
-
-        tvCalendarioVacio.visibility =
-            if (estaVacio) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            actualizarSecciones(entrenamientosValidos)
+        }
     }
 
-    private fun abrirDetalleEntrenamiento(
-        entrenamiento: EntrenamientoProgramado
-    ) {
+    private fun actualizarSecciones(entrenamientos: List<EntrenamientoProgramado>) {
 
-        val intent = Intent(
-            requireContext(),
-            DetalleRutinaActivity::class.java
-        )
+        val proximos = entrenamientos.filter {
+            it.calcularEstado() == EstadoEntrenamiento.PROXIMA
+        }
 
-        intent.putExtra(
-            "RUTINA_ID",
-            entrenamiento.rutinaId
-        )
+        val cumplidos = entrenamientos.filter {
+            it.calcularEstado() == EstadoEntrenamiento.CUMPLIDA
+        }
 
-        intent.putExtra(
-            "RUTINA_NOMBRE",
-            entrenamiento.nombreRutina
-        )
+        val vencidos = entrenamientos.filter {
+            it.calcularEstado() == EstadoEntrenamiento.VENCIDA
+        }
 
-        intent.putExtra(
-            "RUTINA_DESCRIPCION",
-            entrenamiento.descripcion
-        )
+        adapterProximos.actualizarLista(proximos)
+        adapterCumplidos.actualizarLista(cumplidos)
+        adapterVencidos.actualizarLista(vencidos)
 
-        intent.putExtra(
-            "RUTINA_NIVEL",
-            entrenamiento.nivel
-        )
+        mostrarSeccion(rvCalendario, tvCalendarioVacio, proximos)
+        mostrarSeccion(rvCalendarioCumplidos, tvCalendarioCumplidosVacio, cumplidos)
+        mostrarSeccion(rvCalendarioVencidos, tvCalendarioVencidosVacio, vencidos)
 
-        intent.putExtra(
-            "RUTINA_DURACION",
-            entrenamiento.duracionMinutos
-        )
-
-        intent.putExtra(
-            "RUTINA_EJERCICIOS",
-            entrenamiento.cantidadEjercicios
-        )
-
-        intent.putExtra(
-            "ENTRENAMIENTO_PROGRAMADO_ID",
-            entrenamiento.id
-        )
-
-        intent.putExtra(
-            "ENTRENAMIENTO_FECHA",
-            entrenamiento.fecha
-        )
-
-        intent.putExtra(
-            "ENTRENAMIENTO_HORA",
-            entrenamiento.hora
-        )
-
-        intent.putExtra(
-            "VIENE_DE_CALENDARIO",
-            true
-        )
-
-        startActivity(
-            intent
-        )
+        tvResumenCalendario.text = "${entrenamientos.size} entrenamientos programados"
+        tvResumenCompletados.text = "${cumplidos.size} completados"
     }
 
-    /*
-     * Puedes llamar este método después desde un botón de opciones.
-     * Ya no se abre automáticamente al tocar la tarjeta, porque ahora
-     * tocar la tarjeta abre el detalle.
-     */
-    private fun mostrarOpcionesEntrenamiento(
-        entrenamiento: EntrenamientoProgramado
+    private fun mostrarSeccion(
+        recyclerView: RecyclerView,
+        vacioTextView: TextView,
+        lista: List<EntrenamientoProgramado>
     ) {
+        val estaVacio = lista.isEmpty()
+        recyclerView.visibility = if (estaVacio) View.GONE else View.VISIBLE
+        vacioTextView.visibility = if (estaVacio) View.VISIBLE else View.GONE
+    }
 
-        val opciones = arrayOf(
-            if (entrenamiento.completado) {
-                "Marcar como pendiente"
-            } else {
-                "Marcar como completado"
-            },
-            "Eliminar del calendario"
-        )
+    private fun abrirDetalleEntrenamiento(entrenamiento: EntrenamientoProgramado) {
 
-        AlertDialog.Builder(
-            requireContext()
-        )
-            .setTitle(
-                entrenamiento.nombreRutina
-            )
-            .setMessage(
-                "${entrenamiento.fecha}, " +
-                        "${entrenamiento.hora}\n" +
-                        "${entrenamiento.duracionMinutos} minutos"
-            )
-            .setItems(
-                opciones
-            ) { _, posicion ->
+        val intent = Intent(requireContext(), DetalleRutinaActivity::class.java)
 
-                when (posicion) {
+        intent.putExtra("RUTINA_ID", entrenamiento.rutinaId)
+        intent.putExtra("RUTINA_NOMBRE", entrenamiento.nombreRutina)
+        intent.putExtra("RUTINA_DESCRIPCION", entrenamiento.descripcion)
+        intent.putExtra("RUTINA_NIVEL", entrenamiento.nivel)
+        intent.putExtra("RUTINA_DURACION", entrenamiento.duracionMinutos)
+        intent.putExtra("RUTINA_EJERCICIOS", entrenamiento.cantidadEjercicios)
+        intent.putExtra("ENTRENAMIENTO_PROGRAMADO_ID", entrenamiento.id)
+        intent.putExtra("ENTRENAMIENTO_FECHA", entrenamiento.fecha)
+        intent.putExtra("ENTRENAMIENTO_HORA", entrenamiento.hora)
+        intent.putExtra("VIENE_DE_CALENDARIO", true)
 
-                    0 -> {
-                        repository.cambiarEstado(
-                            entrenamiento.id
-                        )
-                    }
-
-                    1 -> {
-                        repository.eliminarEntrenamiento(
-                            entrenamiento.id
-                        )
-                    }
-                }
-
-                cargarEntrenamientos()
-            }
-            .setNegativeButton(
-                "Cerrar",
-                null
-            )
-            .show()
+        startActivity(intent)
     }
 }
